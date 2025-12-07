@@ -5,6 +5,26 @@
   </header>
 
   <form #lootForm="ngForm" (ngSubmit)="processLogs()">
+    <mat-card class="party-log-card" appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Party Hunt Analyzer</mat-card-title>
+        <mat-card-subtitle>Paste the party log with Balance info</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width log-field">
+          <mat-label>Party Log Content</mat-label>
+          <textarea
+            matInput
+            [ngModel]="partyLogInput()"
+            (ngModelChange)="partyLogInput.set($event)"
+            name="partyLog"
+            rows="6"
+            placeholder="Session data..."
+          ></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
     <div class="player-grid">
       @for (player of players(); track player.id; let i = $index) {
       <mat-card class="player-card" appearance="outlined">
@@ -67,56 +87,85 @@
   @if (results(); as res) {
   <div class="results-container">
     <mat-divider></mat-divider>
-    <div class="results-header">
-      <h2>Results</h2>
-      <div class="total-value">
-        <mat-icon>monetization_on</mat-icon>
-        <span>Est. Value: {{ res.totalValue | number }} gp</span>
-      </div>
+
+    <div class="financial-section">
+      <h2>Liquid Balance Calculation</h2>
+      <table mat-table [dataSource]="res.financials" class="mat-elevation-z2 financial-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Player</th>
+          <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="original">
+          <th mat-header-cell *matHeaderCellDef>Log Balance</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.originalBalance | number }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="deduction">
+          <th mat-header-cell *matHeaderCellDef>Items Kept</th>
+          <td mat-cell *matCellDef="let element" class="negative-val">
+            - {{ element.productValueDeducted | number }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="final">
+          <th mat-header-cell *matHeaderCellDef>Liquid Balance</th>
+          <td
+            mat-cell
+            *matCellDef="let element"
+            [class.profit]="element.finalLiquidBalance > 0"
+            [class.waste]="element.finalLiquidBalance < 0"
+          >
+            <strong>{{ element.finalLiquidBalance | number }}</strong>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      <div class="party-total">Total Liquid Profit: {{ res.partyBalance | number }} gp</div>
     </div>
 
-    <div class="results-grid">
-      <mat-card appearance="raised" class="result-card">
-        <mat-card-header
-          ><mat-card-title>Filtered Creature Products</mat-card-title></mat-card-header
-        >
-        <mat-card-content>
-          @if ((res.totalLoot | keyvalue).length === 0) {
-          <p class="empty-state">No creature products found in logs.</p>
-          }
-          <mat-chip-set>
-            @for (item of res.totalLoot | keyvalue; track item.key) {
-            <mat-chip>{{ item.value }}x {{ item.key }}</mat-chip>
-            }
-          </mat-chip-set>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card appearance="raised" class="result-card warn-card">
+    <div class="settlement-grid">
+      <mat-card appearance="raised" class="result-card gold-card">
         <mat-card-header>
-          <mat-card-title>Remainder</mat-card-title>
-          <mat-card-subtitle>(Cannot split evenly)</mat-card-subtitle>
+          <mat-icon mat-card-avatar class="gold-icon">payments</mat-icon>
+          <mat-card-title>Bank Transfers</mat-card-title>
+          <mat-card-subtitle>Settle these to equalize profit</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          @if ((res.remainder | keyvalue).length === 0) {
-          <p class="empty-state">Perfect split! No remainder.</p>
+          @if (res.goldInstructions.length === 0) {
+          <p>Balances are equal. No transfers needed.</p>
           }
-          <mat-chip-set>
-            @for (item of res.remainder | keyvalue; track item.key) {
-            <mat-chip color="warn" highlighted>{{ item.value }}x {{ item.key }}</mat-chip>
+          <div class="instruction-list">
+            @for (ins of res.goldInstructions; track $index) {
+            <div class="instruction-row gold-row">
+              <span class="player source">{{ ins.from }}</span>
+              <span class="arrow">pays</span>
+              <span class="amount">{{ ins.amount | number }} gp</span>
+              <span class="arrow">to</span>
+              <span class="player dest">{{ ins.to }}</span>
+            </div>
             }
-          </mat-chip-set>
+          </div>
         </mat-card-content>
       </mat-card>
 
       <mat-card appearance="raised" class="result-card info-card">
-        <mat-card-header><mat-card-title>Transfers Needed</mat-card-title></mat-card-header>
+        <mat-card-header>
+          <mat-icon mat-card-avatar>compare_arrows</mat-icon>
+          <mat-card-title>Item Transfers</mat-card-title>
+          <mat-card-subtitle>Physical items to trade</mat-card-subtitle>
+        </mat-card-header>
         <mat-card-content>
-          @if (res.instructions.length === 0) {
-          <p class="empty-state">No transfers needed. Everyone has their share.</p>
+          @if (res.itemInstructions.length === 0) {
+          <p>No item trades needed.</p>
           }
           <div class="instruction-list">
-            @for (ins of res.instructions; track $index) {
+            @for (ins of res.itemInstructions; track $index) {
             <div class="instruction-row">
               <span class="player">{{ ins.from }}</span>
               <span class="arrow">gives</span>
@@ -126,6 +175,36 @@
             </div>
             }
           </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="raised" class="result-card product-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>category</mat-icon>
+          <mat-card-title>Total Products</mat-card-title>
+          <mat-card-subtitle>Total Value: {{ res.totalValue | number }} gp</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @if ((res.totalLoot | keyvalue).length === 0) {
+          <p class="empty-text">No creature products found.</p>
+          }
+          <mat-chip-set>
+            @for (item of res.totalLoot | keyvalue; track item.key) {
+            <mat-chip class="loot-chip">
+              <span class="chip-qty">{{ item.value }}x</span> {{ item.key }}
+            </mat-chip>
+            }
+          </mat-chip-set>
+
+          @if ((res.remainder | keyvalue).length > 0) {
+          <mat-divider style="margin: 1rem 0"></mat-divider>
+          <div class="remainder-section">
+            <small>Remainder (Unsplit):</small>
+            @for (item of res.remainder | keyvalue; track item.key) {
+            <span class="remainder-item">{{ item.value }}x {{ item.key }}</span>
+            }
+          </div>
+          }
         </mat-card-content>
       </mat-card>
     </div>

@@ -160,3 +160,70 @@
     border-radius: 20px;
   }
 }
+
+.settlement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.gold-card {
+  border: 1px solid #ffd700; // Gold border
+  background-color: #fffcf0;
+
+  .gold-icon {
+    color: #fbc02d;
+  }
+}
+
+.gold-row {
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+
+  .amount {
+    color: #bf360c;
+    font-size: 1.1em;
+  }
+}
+
+.source {
+  color: #d32f2f;
+  font-weight: bold;
+}
+.dest {
+  color: #388e3c;
+  font-weight: bold;
+}
+
+.product-card {
+  .loot-chip {
+    font-weight: 500;
+    .chip-qty {
+      font-weight: bold;
+      margin-right: 4px;
+    }
+  }
+
+  .remainder-section {
+    color: #666;
+    font-size: 0.85rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .remainder-item {
+    background: #eee;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+}
+
+.empty-text {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  margin-top: 1rem;
+}
