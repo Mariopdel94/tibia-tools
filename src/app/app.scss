@@ -1,0 +1,162 @@
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+
+  h1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 2rem;
+    color: #3f51b5; // Primary Material Color
+  }
+}
+
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.player-card {
+  display: flex;
+  flex-direction: column;
+
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.log-field textarea {
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.add-player-btn {
+  border: 2px dashed #ccc;
+  background: transparent;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #666;
+
+  mat-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+    margin-bottom: 1rem;
+  }
+
+  &:hover {
+    border-color: #3f51b5;
+    color: #3f51b5;
+    background-color: rgba(63, 81, 181, 0.04);
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.results-container {
+  margin-top: 3rem;
+
+  h2 {
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.result-card {
+  height: 100%;
+}
+
+.empty-state {
+  color: #888;
+  font-style: italic;
+}
+
+.instruction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.instruction-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  flex-wrap: wrap;
+
+  .player {
+    font-weight: bold;
+    color: #333;
+  }
+
+  .amount {
+    font-weight: bold;
+    color: #3f51b5;
+  }
+
+  .arrow {
+    color: #666;
+    font-size: 0.9em;
+  }
+}
+
+.results-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin: 1.5rem 0;
+
+  h2 {
+    margin: 0;
+  }
+
+  .total-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #4caf50; // Green for money
+    font-weight: bold;
+    font-size: 1.2rem;
+    background: rgba(76, 175, 80, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+  }
+}
