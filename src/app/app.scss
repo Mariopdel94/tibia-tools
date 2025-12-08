@@ -230,7 +230,7 @@
 
 .header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 
   h1 {
     display: flex;
@@ -271,5 +271,55 @@
   .tibia-coin {
     color: #fbc02d;
     font-weight: bold;
+  }
+}
+
+.info-section {
+  background: #e8eaf6; // Very light Indigo/Blue
+  border-left: 4px solid #3f51b5; // Matching Primary Color
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 4px;
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+
+  .info-icon {
+    background: #fff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+
+    mat-icon {
+      color: #3f51b5;
+    }
+  }
+
+  .info-content {
+    h3 {
+      margin: 0 0 0.5rem 0;
+      color: #1a237e;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+      color: #455a64;
+      font-size: 0.95rem;
+    }
+
+    strong {
+      color: #283593;
+    }
   }
 }
