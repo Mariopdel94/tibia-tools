@@ -184,17 +184,26 @@
           <mat-card-subtitle>Physical items to trade</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          @if (res.itemInstructions.length === 0) {
-          <p>No item trades needed.</p>
+          @if (res.groupedItemInstructions.length === 0) {
+          <p class="empty-text">No item trades needed.</p>
           }
           <div class="instruction-list">
-            @for (ins of res.itemInstructions; track $index) {
-            <div class="instruction-row">
-              <span class="player">{{ ins.from }}</span>
-              <span class="arrow">gives</span>
-              <span class="amount">{{ ins.amount }}x {{ ins.item }}</span>
-              <span class="arrow">to</span>
-              <span class="player">{{ ins.to }}</span>
+            @for (group of res.groupedItemInstructions; track $index) {
+            <div class="trade-group">
+              <div class="trade-header">
+                <span class="player source">{{ group.from }}</span>
+                <span class="arrow-text">trades to</span>
+                <span class="player dest">{{ group.to }}</span>
+              </div>
+
+              <div class="trade-items">
+                @for (item of group.items; track item.name) {
+                <div class="trade-item-row">
+                  <span class="qty">{{ item.amount }}x</span>
+                  <span class="name">{{ item.name }}</span>
+                </div>
+                }
+              </div>
             </div>
             }
           </div>

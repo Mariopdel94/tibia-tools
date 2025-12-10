@@ -38,10 +38,15 @@ interface LootResult {
   totalLoot: Record<string, number>;
   totalValue: number;
   remainder: Record<string, number>;
-  itemInstructions: TransferInstruction[];
-  goldInstructions: TransferInstruction[]; // NEW: Bank transfers
+  groupedItemInstructions: GroupedItemTransfer[];
+  goldInstructions: TransferInstruction[];
   financials: FinancialResult[];
   partyBalance: number;
+}
+interface GroupedItemTransfer {
+  from: string;
+  to: string;
+  items: { name: string; amount: number }[];
 }
 
 @Component({
@@ -235,6 +240,28 @@ export class App {
       }
     }
 
+    const transferMap = new Map<string, GroupedItemTransfer>();
+
+    itemInstructions.forEach((ins) => {
+      // Create a unique key for the relationship
+      const key = `${ins.from}|${ins.to}`;
+
+      if (!transferMap.has(key)) {
+        transferMap.set(key, {
+          from: ins.from,
+          to: ins.to,
+          items: [],
+        });
+      }
+
+      transferMap.get(key)!.items.push({
+        name: ins.item!,
+        amount: ins.amount,
+      });
+    });
+
+    const groupedItemInstructions = Array.from(transferMap.values());
+
     // 3. Financials & Gold Transfers
     const financials: FinancialResult[] = [];
     let totalPartyLiquidBalance = 0;
@@ -300,7 +327,7 @@ export class App {
       totalLoot: globalTotal,
       totalValue: totalCreatureValue,
       remainder,
-      itemInstructions,
+      groupedItemInstructions,
       goldInstructions, // Result of step 4
       financials,
       partyBalance: totalPartyLiquidBalance,
