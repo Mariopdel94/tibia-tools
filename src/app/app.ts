@@ -106,15 +106,17 @@ export class App {
     const validPlayers = this.players().filter((p) => p.name.trim() && p.log.trim());
 
     // We allow processing even if only Party Log is present (though deduction won't happen)
-    validPlayers.forEach((p) => (sessionLogs[p.name] = p.log));
+    validPlayers.forEach((p) => (sessionLogs[p.name.trim().toLowerCase()] = p.log));
 
     const partyData = this.parsePartyAnalyzer(this.partyLogInput());
     const result = this.calculateDistribution(sessionLogs, partyData);
     this.results.set(result);
   }
 
-  private parsePartyAnalyzer(log: string): Record<string, { balance: number }> {
-    const result: Record<string, { balance: number }> = {};
+  private parsePartyAnalyzer(
+    log: string
+  ): Record<string, { balance: number; originalName: string }> {
+    const result: Record<string, { balance: number; originalName: string }> = {};
     const lines = log.split('\n');
     let currentPlayer = '';
 
@@ -133,7 +135,10 @@ export class App {
       if (currentPlayer && trimmed.startsWith('Balance:')) {
         const parts = trimmed.split(':');
         if (parts.length > 1) {
-          result[currentPlayer] = { balance: getNumber(parts[1]) };
+          result[currentPlayer.toLowerCase()] = {
+            balance: getNumber(parts[1]),
+            originalName: currentPlayer,
+          };
         }
       }
     }
@@ -142,11 +147,20 @@ export class App {
 
   private calculateDistribution(
     sessionLogs: Record<string, string>,
-    partyData: Record<string, { balance: number }>
+    partyData: Record<string, { balance: number; originalName: string }>
   ): LootResult {
     const productMap = this.getNormalizedProductMap();
+    const uniqueNames = new Set([...Object.keys(partyData), ...Object.keys(sessionLogs)]);
+    const playerIds = Array.from(uniqueNames);
     const playerNames =
       Object.keys(partyData).length > 0 ? Object.keys(partyData) : Object.keys(sessionLogs);
+
+    const getDisplayName = (id: string) => {
+      if (partyData[id]) return partyData[id].originalName;
+      // If not in party log, try to find it in the input array (this acts as a fallback)
+      const inputPlayer = this.players().find((p) => p.name.trim().toLowerCase() === id);
+      return inputPlayer ? inputPlayer.name : id;
+    };
 
     const playerProductValue: Record<string, number> = {};
     const globalTotal: Record<string, number> = {};
@@ -228,8 +242,8 @@ export class App {
       while (gIdx < givers.length && rIdx < receivers.length) {
         const amt = Math.min(givers[gIdx].surplus, receivers[rIdx].deficit);
         itemInstructions.push({
-          from: givers[gIdx].player,
-          to: receivers[rIdx].player,
+          from: getDisplayName(givers[gIdx].player),
+          to: getDisplayName(receivers[rIdx].player),
           item,
           amount: amt,
         });
@@ -266,7 +280,7 @@ export class App {
     const financials: FinancialResult[] = [];
     let totalPartyLiquidBalance = 0;
 
-    playerNames.forEach((p) => {
+    playerIds.forEach((p) => {
       const originalBalance = partyData[p] ? partyData[p].balance : 0;
       const deduction = playerProductValue[p] || 0;
       const finalLiquid = originalBalance - deduction;
@@ -274,7 +288,7 @@ export class App {
       totalPartyLiquidBalance += finalLiquid;
 
       financials.push({
-        name: p,
+        name: getDisplayName(p),
         originalBalance: originalBalance,
         productValueDeducted: deduction,
         finalLiquidBalance: finalLiquid,
@@ -283,7 +297,7 @@ export class App {
 
     // 4. Calculate Gold Transfers (Bank Settlement)
     const goldInstructions: TransferInstruction[] = [];
-    const targetLiquidBalance = Math.floor(totalPartyLiquidBalance / playerNames.length);
+    const targetLiquidBalance = Math.floor(totalPartyLiquidBalance / playerIds.length);
 
     let richPlayers: { name: string; surplus: number }[] = [];
     let poorPlayers: { name: string; deficit: number }[] = [];
