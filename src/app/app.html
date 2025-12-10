@@ -166,11 +166,21 @@
           <div class="instruction-list">
             @for (ins of res.goldInstructions; track $index) {
             <div class="instruction-row gold-row">
-              <span class="player source">{{ ins.from }}</span>
-              <span class="arrow">transfer</span>
-              <span class="amount">{{ ins.amount }}</span>
-              <span class="arrow">to</span>
-              <span class="player dest">{{ ins.to }}</span>
+              <div class="row-text">
+                <span class="player source">{{ ins.from }}</span>
+                <span class="arrow">transfer</span>
+                <span class="amount">{{ ins.amount }}</span>
+                <span class="arrow">to</span>
+                <span class="player dest">{{ ins.to }}</span>
+              </div>
+              <button
+                mat-icon-button
+                class="copy-btn"
+                (click)="copyTransfer(ins)"
+                title="Copy NPC Command: transfer {{ ins.amount }} to {{ ins.to }}"
+              >
+                <mat-icon>content_copy</mat-icon>
+              </button>
             </div>
             }
           </div>

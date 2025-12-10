@@ -180,10 +180,41 @@
 .gold-row {
   background: rgba(255, 215, 0, 0.15);
   border: 1px solid rgba(255, 215, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between; // Pushes text left, button right
+  padding: 4px 12px; // Adjusted padding
+
+  .row-text {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    flex: 1;
+  }
 
   .amount {
     color: #bf360c;
     font-size: 1.1em;
+    font-weight: bold;
+  }
+
+  .copy-btn {
+    color: #bf360c;
+    opacity: 0.6;
+    transition: all 0.2s;
+
+    // Make icon slightly smaller to fit row nicely
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      opacity: 1;
+      background-color: rgba(255, 215, 0, 0.2);
+    }
   }
 }
 

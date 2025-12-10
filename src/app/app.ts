@@ -347,4 +347,13 @@ export class App {
       partyBalance: totalPartyLiquidBalance,
     };
   }
+
+  copyTransfer(ins: TransferInstruction) {
+    const command = `transfer ${ins.amount} to ${ins.to}`;
+    navigator.clipboard.writeText(command).then(() => {
+      // Optional: Visual feedback (console or alert, or just rely on UI)
+      // For a polished app, you might use MatSnackBar here
+      console.log('Copied:', command);
+    });
+  }
 }
