@@ -40,7 +40,28 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
 
-    <div class="party-total">Total Liquid Profit: {{ res.partyBalance | number }} gp</div>
+    <div class="center-xy" style="margin-top: 1rem">
+      <div class="party-total">Total Liquid Profit: {{ res.partyBalance | number }} gp</div>
+      <button
+        mat-flat-button
+        color="accent"
+        class="share-btn"
+        (click)="!isLoadingShortUrlGeneration() && shareShortUrl.emit()"
+      >
+        @if (isLoadingShortUrlGeneration()) {
+        <mat-spinner></mat-spinner>
+        } @else {
+        <div class="center-xy" style="gap: var(--mat-button-filled-icon-spacing, 8px)">
+          <mat-icon>share</mat-icon>
+          Generate TinyURL Share Link
+        </div>
+        }
+      </button>
+      <button mat-flat-button color="accent" class="share-btn" (click)="shareLongUrl.emit()">
+        <mat-icon>share</mat-icon>
+        Generate Long Share Link
+      </button>
+    </div>
   </div>
 
   <div class="settlement-grid">

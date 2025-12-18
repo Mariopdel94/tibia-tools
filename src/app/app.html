@@ -1,27 +1,21 @@
 <div class="container">
-  <app-header>
-    <button
-      actions
-      mat-flat-button
-      color="accent"
-      class="share-btn"
-      (click)="generateShareLink()"
-      [disabled]="!partyLogInput() && players().length <= 2"
-    >
-      <mat-icon>share</mat-icon>
-      Share Results
-    </button>
-  </app-header>
-
+  <app-header />
   <app-instruction-card />
 
   <app-loot-form
     [partyLogInput]="partyLogInput()"
+    (partyLogInputChange)="partyLogInput.set($event)"
     [players]="players()"
+    (playersChange)="players.set($event)"
     (calculate)="onCalculate()"
   />
 
   @if (results(); as res) {
-  <app-loot-report [result]="res" />
+  <app-loot-report
+    [result]="res"
+    (shareLongUrl)="generateLongShareLink()"
+    (shareShortUrl)="generateShortShareLink()"
+    [isLoadingShortUrlGeneration]="isGeneratingTinyUrl()"
+  />
   }
 </div>

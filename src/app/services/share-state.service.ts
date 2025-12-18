@@ -7,6 +7,20 @@ type MinifiedState = [string, [string, string][]];
 
 @Injectable({ providedIn: 'root' })
 export class ShareStateService {
+  async shortenUrl(longUrl: string): Promise<string> {
+    // Free TinyURL API (No key required for basic usage)
+    const api = `https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`;
+    try {
+      const response = await fetch(api);
+      if (response.ok) {
+        return await response.text(); // Returns the short URL
+      }
+      return longUrl; // Fallback to long URL if fail
+    } catch (err) {
+      return longUrl;
+    }
+  }
+
   /**
    * Compresses the current state into a URL-safe string.
    */

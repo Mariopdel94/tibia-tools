@@ -59,6 +59,7 @@ export class App implements OnInit {
     { id: 4, name: '', log: '' },
   ]);
   readonly results = signal<LootResult | null>(null);
+  isGeneratingTinyUrl = signal<boolean>(false);
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
@@ -69,21 +70,35 @@ export class App implements OnInit {
     });
   }
 
-  generateShareLink() {
-    // 1. Compress Data
-    const hash = this.shareService.encodeState(this.partyLogInput(), this.players());
-
-    // 2. Build Full URL
-    const baseUrl = window.location.origin + window.location.pathname;
-    const fullUrl = `${baseUrl}?s=${hash}`;
-
-    // 3. Copy to Clipboard
-    navigator.clipboard.writeText(fullUrl).then(() => {
-      this.snackBar.open('Shareable link copied to clipboard!', 'Nice', { duration: 3000 });
-
-      // Optional: Update browser URL without reloading so the user sees the hash
+  copyShareLink(url: string, hash: string) {
+    navigator.clipboard.writeText(url).then(() => {
+      this.snackBar.open('Link copied to clipboard!', 'OK', { duration: 3000 });
+      // Note: We don't push the tinyURL to the browser history,
+      // we keep the long one or just the hash so reload works.
       this.router.navigate([], { queryParams: { s: hash }, replaceUrl: true });
     });
+  }
+
+  generateLongShareLink(copyUrl: boolean = true) {
+    const hash = this.shareService.encodeState(this.partyLogInput(), this.players());
+    const baseUrl = window.location.origin + window.location.pathname;
+    const longUrl = `${baseUrl}?s=${hash}`;
+
+    if (copyUrl) {
+      this.copyShareLink(longUrl, hash);
+    }
+
+    return { longUrl, hash };
+  }
+
+  async generateShortShareLink() {
+    const { longUrl, hash } = this.generateLongShareLink(false);
+
+    // Try to shorten it
+    this.isGeneratingTinyUrl.set(true);
+    const finalUrl = await this.shareService.shortenUrl(longUrl);
+    this.isGeneratingTinyUrl.set(false);
+    this.copyShareLink(finalUrl, hash);
   }
 
   loadSharedState(hash: string) {
