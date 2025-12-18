@@ -1,4 +1,4 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, inject, model, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -34,15 +34,9 @@ import { LootCalculatorService } from '../../services/loot-calculator.service';
 })
 export class LootForm {
   lootCalculator = inject(LootCalculatorService);
+  partyLogInput = model.required<string>();
+  players = model.required<PlayerInput[]>();
   calculate = output<{ partyLog: string; players: PlayerInput[] }>();
-
-  readonly partyLogInput = signal<string>('');
-  readonly players = signal<PlayerInput[]>([
-    { id: 1, name: '', log: '' },
-    { id: 2, name: '', log: '' },
-    { id: 3, name: '', log: '' },
-    { id: 4, name: '', log: '' },
-  ]);
 
   addPlayer() {
     this.players.update((current) => [...current, { id: Date.now(), name: '', log: '' }]);

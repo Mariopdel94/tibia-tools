@@ -1,8 +1,25 @@
 <div class="container">
-  <app-header />
+  <app-header>
+    <button
+      actions
+      mat-flat-button
+      color="accent"
+      class="share-btn"
+      (click)="generateShareLink()"
+      [disabled]="!partyLogInput() && players().length <= 2"
+    >
+      <mat-icon>share</mat-icon>
+      Share Results
+    </button>
+  </app-header>
+
   <app-instruction-card />
 
-  <app-loot-form />
+  <app-loot-form
+    [partyLogInput]="partyLogInput()"
+    [players]="players()"
+    (calculate)="onCalculate()"
+  />
 
   @if (results(); as res) {
   <app-loot-report [result]="res" />
