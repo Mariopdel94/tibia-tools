@@ -1,6 +1,7 @@
 import { Clipboard } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -42,6 +43,7 @@ export class LiveSessionComponent implements OnInit {
   private calculator = inject(LootCalculatorService);
   private clipboard = inject(Clipboard);
   private snackBar = inject(MatSnackBar);
+  private destroyRef = inject(DestroyRef);
 
   sessionId = signal<string>('');
   sessionData = signal<LiveSession | null>(null);
@@ -75,18 +77,21 @@ export class LiveSessionComponent implements OnInit {
     this.sessionId.set(id);
 
     // Subscribe to Realtime Updates
-    this.liveService.getSession(id).subscribe((data) => {
-      if (data) {
-        this.sessionData.set(data);
+    this.liveService
+      .getSession(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((data) => {
+        if (data) {
+          this.sessionData.set(data);
 
-        // If I exist in DB, sync my local form to DB (in case of refresh)
-        const me = data.members[this.liveService.myUserId];
-        if (me && this.myName() === '') {
-          this.myName.set(me.name);
-          this.myLog.set(me.log);
+          // If I exist in DB, sync my local form to DB (in case of refresh)
+          const me = data.members[this.liveService.myUserId];
+          if (me && this.myName() === '') {
+            this.myName.set(me.name);
+            this.myLog.set(me.log);
+          }
         }
-      }
-    });
+      });
   }
 
   // --- Actions ---

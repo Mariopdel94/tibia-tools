@@ -1,5 +1,18 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, addDoc, collection, doc, onSnapshot, updateDoc } from '@angular/fire/firestore';
+import {
+  Firestore,
+  Timestamp,
+  addDoc,
+  collection,
+  doc,
+  getCountFromServer,
+  getDocs,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+  writeBatch,
+} from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { LootResult } from '../models/creature-product-splitter';
 
@@ -18,11 +31,15 @@ export interface LiveSession {
   results?: LootResult;
 }
 
+const SESSION_EXPIRATION_DAYS = 7; // How old a session must be to get deleted
+const MAX_SESSION_DOCUMENTS = 2000; // Max desired sessions
+const CLEANUP_THRESHOLD = 0.75; // Only clean if we are at 75% capacity
+
 @Injectable({ providedIn: 'root' })
 export class LiveSessionService {
   private firestore = inject(Firestore);
 
-  // 1. Identity Management (No Login required)
+  // Identity Management (No Login required)
   readonly myUserId: string;
 
   constructor() {
@@ -35,8 +52,9 @@ export class LiveSessionService {
     this.myUserId = storedId;
   }
 
-  // 2. Create a new Session (You become Leader)
+  // Create a new Session (You become Leader)
   async createSession(): Promise<string> {
+    this.cleanupOldSessions();
     const sessionsColl = collection(this.firestore, 'sessions');
     const newDoc = await addDoc(sessionsColl, {
       createdAt: Date.now(),
@@ -54,7 +72,42 @@ export class LiveSessionService {
     return newDoc.id;
   }
 
-  // 3. Listen to Session Changes
+  private async cleanupOldSessions() {
+    try {
+      const sessionsColl = collection(this.firestore, 'sessions');
+
+      const countSnapshot = await getCountFromServer(sessionsColl);
+      const currentCount = countSnapshot.data().count;
+      const limit = MAX_SESSION_DOCUMENTS * CLEANUP_THRESHOLD;
+
+      if (currentCount < limit) {
+        console.log(`Skipping cleanup. Count: ${currentCount}/${MAX_SESSION_DOCUMENTS}`);
+        return;
+      }
+
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() - SESSION_EXPIRATION_DAYS);
+      const cutoffTimestamp = Timestamp.fromDate(expirationDate);
+
+      const oldSessionsQuery = query(sessionsColl, where('createdAt', '<', cutoffTimestamp));
+
+      const snapshot = await getDocs(oldSessionsQuery);
+
+      if (!snapshot.empty) {
+        const batch = writeBatch(this.firestore);
+        snapshot.docs.forEach((doc) => {
+          batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        console.log(`Cleaned up ${snapshot.size} expired sessions.`);
+      }
+    } catch (err) {
+      console.warn('Cleanup failed (check permissions or indexes):', err);
+    }
+  }
+
+  // Listen to Session Changes
   getSession(sessionId: string): Observable<LiveSession | undefined> {
     const docRef = doc(this.firestore, `sessions/${sessionId}`);
 
@@ -85,7 +138,7 @@ export class LiveSessionService {
     });
   }
 
-  // 4. Update My Data (Member or Leader)
+  // Update My Data (Member or Leader)
   async updateMyEntry(sessionId: string, name: string, log: string) {
     const docRef = doc(this.firestore, `sessions/${sessionId}`);
     // Update specific key in the map to avoid overwriting others
@@ -97,7 +150,7 @@ export class LiveSessionService {
     });
   }
 
-  // 5. Update Party Log (Leader Only)
+  // Update Party Log (Leader Only)
   async updatePartyLog(sessionId: string, log: string) {
     const docRef = doc(this.firestore, `sessions/${sessionId}`);
     await updateDoc(docRef, { partyLog: log });
