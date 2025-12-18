@@ -1,0 +1,177 @@
+<div class="container">
+  <app-header>
+    <button mat-stroked-button class="invite-btn" (click)="copyLink()">
+      <mat-icon>link</mat-icon> Copy Invite Link
+    </button>
+  </app-header>
+
+  <div class="live-status-bar">
+    <div class="status-badge"><span class="pulsing-dot"></span> Live Session</div>
+    <div class="status-info">
+      <span class="count">{{ memberList().length }}</span>
+      <span class="label">Members in Lobby</span>
+    </div>
+  </div>
+
+  @if (sessionData(); as session) {
+  <div class="session-grid">
+    <mat-card appearance="outlined" class="input-card user-card">
+      <mat-card-header>
+        <div class="header-icon-wrapper">
+          <mat-icon>person_edit</mat-icon>
+        </div>
+        <div class="header-text">
+          <mat-card-title>Your Data</mat-card-title>
+          <mat-card-subtitle>Enter your character details</mat-card-subtitle>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Character Name</mat-label>
+          <input
+            matInput
+            [ngModel]="myName()"
+            (ngModelChange)="myName.set($event); updateMyData()"
+            placeholder="e.g. Eternal Oblivion"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width log-field">
+          <mat-label>Session Log</mat-label>
+          <textarea
+            matInput
+            [ngModel]="myLog()"
+            (ngModelChange)="myLog.set($event); updateMyData()"
+            placeholder="Paste 'Looted Items:...' here"
+          ></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    @if (isLeader()) {
+    <mat-card appearance="raised" class="input-card leader-card">
+      <mat-card-header>
+        <div class="header-icon-wrapper gold">
+          <mat-icon>emoji_events</mat-icon>
+        </div>
+        <div class="header-text">
+          <mat-card-title>Party Analyzer</mat-card-title>
+          <mat-card-subtitle class="leader-badge">👑 You are the Leader</mat-card-subtitle>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width log-field">
+          <mat-label>Party Analyzer Log</mat-label>
+          <textarea
+            matInput
+            [ngModel]="session.partyLog"
+            (ngModelChange)="updatePartyLog($event)"
+            placeholder="Paste Balance log here..."
+          ></textarea>
+        </mat-form-field>
+
+        <div class="lobby-section">
+          <h3>Lobby Status</h3>
+          <div class="members-list">
+            @for(m of memberList(); track m.id) {
+            <div class="member-chip" [class.ready]="m.log.length > 10">
+              <div class="avatar">
+                <mat-icon>{{ m.log.length > 10 ? 'check_circle' : 'hourglass_empty' }}</mat-icon>
+              </div>
+              <div class="member-info">
+                <span class="name">{{ m.name || 'Unknown' }}</span>
+                <span class="status">{{ m.log.length > 10 ? 'Ready' : 'Not Ready' }}</span>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-fab extended color="primary" (click)="calculate()">
+          <mat-icon>publish</mat-icon> Calculate & Publish
+        </button>
+      </mat-card-actions>
+    </mat-card>
+    } @else { @if (!results()) {
+    <mat-card appearance="outlined" class="input-card waiting-card">
+      <mat-card-header>
+        <div class="header-icon-wrapper blue">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <div class="header-text">
+          <mat-card-title>Waiting for Leader</mat-card-title>
+          <mat-card-subtitle>The leader will calculate the split</mat-card-subtitle>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p class="info-text">
+          Wait for all members to verify their logs. The page will update automatically when the
+          calculation is done.
+        </p>
+
+        <div class="lobby-section">
+          <h3>Members Ready</h3>
+          <div class="members-list">
+            @for(m of memberList(); track m.id) {
+            <div class="member-chip" [class.ready]="m.log.length > 10">
+              <div class="avatar">
+                <mat-icon>{{ m.log.length > 10 ? 'check' : 'more_horiz' }}</mat-icon>
+              </div>
+              <span class="name">{{ m.name || 'Joining...' }}</span>
+            </div>
+            }
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    } @else {
+    <mat-card appearance="raised" class="input-card success-card">
+      <mat-card-header>
+        <div class="header-icon-wrapper green">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <div class="header-text">
+          <mat-card-title>Calculation Complete</mat-card-title>
+          <mat-card-subtitle>The loot has been split!</mat-card-subtitle>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="lobby-section">
+          <h3>Members</h3>
+          <div class="members-list">
+            @for(m of memberList(); track m.id) {
+            <div class="member-chip" [class.ready]="m.log.length > 10">
+              <div class="avatar">
+                <mat-icon>{{ m.log.length > 10 ? 'check' : 'more_horiz' }}</mat-icon>
+              </div>
+              <span class="name">{{ m.name || 'Joining...' }}</span>
+            </div>
+            }
+          </div>
+        </div>
+        <p class="success-text">Scroll down to see your transfer details and summary.</p>
+        <button mat-stroked-button class="scroll-btn" (click)="scrollToResults()">
+          <mat-icon>arrow_downward</mat-icon> View Details
+        </button>
+      </mat-card-content>
+    </mat-card>
+    } }
+  </div>
+
+  @if (results(); as res) {
+  <div class="results-wrapper">
+    <app-loot-report [result]="res"></app-loot-report>
+  </div>
+  } } @else {
+  <div class="loading-container">
+    <mat-spinner diameter="60"></mat-spinner>
+    <p>Syncing with Party Session...</p>
+  </div>
+  }
+</div>

@@ -1,0 +1,28 @@
+.container {
+  max-width: 1400px; /* Increased slightly to breathe */
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  color: var(--text-main);
+}
+
+.share-btn {
+  border-radius: 50px; // Pill shape to match the banner
+  height: 42px; // Match height roughly with banner
+  padding: 0 24px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  // Optional: Make it Tibia Gold color instead of default accent
+  // background-color: var(--color-gold) !important;
+  // color: #5d4037 !important;
+}
+
+.live-session-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}

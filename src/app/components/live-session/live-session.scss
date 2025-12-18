@@ -1,0 +1,296 @@
+/* --- Variables (Matches your app theme) --- */
+:host {
+  --live-color: #ff1744;
+  --ready-color: #00c853;
+  --waiting-color: #bdbdbd;
+  --card-bg: #ffffff;
+  --bg-subtle: #f5f7fa;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* --- Status Bar --- */
+.live-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--live-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    .pulsing-dot {
+      width: 10px;
+      height: 10px;
+      background-color: var(--live-color);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+  }
+
+  .status-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-subtle);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+
+    .count {
+      font-weight: 800;
+      color: #333;
+    }
+    .label {
+      color: #666;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+/* --- Grid Layout --- */
+.session-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+  align-items: start;
+}
+
+/* --- Cards General --- */
+.input-card {
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  mat-card-header {
+    padding: 1.5rem 1.5rem 0.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+
+    .header-icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--bg-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+
+      &.green {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+
+      &.gold {
+        background: #fff8e1;
+        color: #fbc02d;
+      }
+      &.blue {
+        background: #e3f2fd;
+        color: #1976d2;
+      }
+
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .header-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .leader-badge {
+      color: #f57f17;
+      font-weight: 600;
+    }
+  }
+
+  mat-card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+/* --- Leader Card Specifics --- */
+.leader-card {
+  border: 2px solid rgba(251, 192, 45, 0.3); // Subtle Gold Border
+  background: linear-gradient(to bottom right, #fff, #fffdf5);
+  box-shadow: 0 8px 30px rgba(251, 192, 45, 0.15);
+
+  mat-card-actions {
+    padding: 1rem 1.5rem;
+    background: #fff8e1;
+    border-top: 1px solid #ffe082;
+  }
+}
+
+/* --- Text Areas --- */
+.log-field textarea {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  min-height: 200px;
+}
+
+/* --- Lobby / Member List --- */
+.lobby-section {
+  margin-top: 1rem;
+  background: var(--bg-subtle);
+  border-radius: 12px;
+  padding: 1rem;
+
+  h3 {
+    margin: 0 0 1rem 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #888;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.member-chip {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: white;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s;
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .member-info {
+    display: flex;
+    flex-direction: column;
+
+    .name {
+      font-weight: 600;
+      color: #333;
+    }
+    .status {
+      font-size: 0.8rem;
+      color: #999;
+    }
+  }
+
+  /* Ready State */
+  &.ready {
+    border-color: #a5d6a7;
+    background: #f1f8e9;
+
+    .avatar {
+      background: var(--ready-color);
+      color: white;
+    }
+
+    .member-info .status {
+      color: var(--ready-color);
+      font-weight: 500;
+    }
+  }
+}
+
+/* Success Card Specifics */
+.success-card {
+  border: 2px solid #a5d6a7; /* Green Border */
+  background: linear-gradient(to bottom right, #fff, #f1f8e9);
+
+  .success-text {
+    font-size: 1.1rem;
+    color: #2e7d32;
+    margin-bottom: 1rem;
+  }
+
+  .scroll-btn {
+    width: 100%;
+    border-color: #2e7d32;
+    color: #2e7d32;
+  }
+}
+
+/* --- Loading State --- */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  gap: 1.5rem;
+  color: #777;
+  font-size: 1.1rem;
+}
+
+/* --- Results Wrapper --- */
+.results-wrapper {
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 23, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 23, 68, 0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
