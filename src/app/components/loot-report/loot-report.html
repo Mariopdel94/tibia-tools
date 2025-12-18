@@ -49,7 +49,9 @@
         (click)="!isLoadingShortUrlGeneration() && shareShortUrl.emit()"
       >
         @if (isLoadingShortUrlGeneration()) {
-        <mat-spinner></mat-spinner>
+        <div class="center-xy">
+          <mat-spinner diameter="24"></mat-spinner>
+        </div>
         } @else {
         <div class="center-xy" style="gap: var(--mat-button-filled-icon-spacing, 8px)">
           <mat-icon>share</mat-icon>
