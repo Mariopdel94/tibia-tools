@@ -5,7 +5,22 @@
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
-:host {
+.full-width {
+  width: 100%;
+}
+
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+
   // Primary & Identity
   --color-primary: #3f51b5;
   --color-primary-light: #e8eaf6;
@@ -29,23 +44,6 @@
   // Layout
   --radius-md: 8px;
   --spacing-md: 1.5rem;
-}
-
-.full-width {
-  width: 100%;
-}
-
-html {
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
-      ),
-      typography: Roboto,
-      density: 0,
-    )
-  );
 }
 
 body {
