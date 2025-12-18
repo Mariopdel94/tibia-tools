@@ -12,11 +12,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
+import { debounceTime, Subject } from 'rxjs';
 import { PlayerInput } from '../../models/creature-product-splitter';
 import { LiveSession, LiveSessionService } from '../../services/live-session.service';
 import { LootCalculatorService } from '../../services/loot-calculator.service';
 import { Header } from '../header/header';
 import { LootReport } from '../loot-report/loot-report';
+import { SessionMembers } from '../session-members/session-members';
 
 @Component({
   selector: 'app-live-session',
@@ -32,6 +34,7 @@ import { LootReport } from '../loot-report/loot-report';
     MatDividerModule,
     Header,
     LootReport,
+    SessionMembers,
   ],
   templateUrl: './live-session.html',
   styleUrl: './live-session.scss',
@@ -53,7 +56,8 @@ export class LiveSessionComponent implements OnInit {
   myName = signal('');
   myLog = signal('');
 
-  // Computed: Am I the leader?
+  private updateTrigger$ = new Subject<void>();
+
   isLeader = computed(() => {
     const data = this.sessionData();
     if (!data || !data.members) return false;
@@ -61,17 +65,22 @@ export class LiveSessionComponent implements OnInit {
     return me?.isLeader || false;
   });
 
-  // Computed: List of all members (for display)
   memberList = computed(() => {
     const data = this.sessionData();
     if (!data || !data.members) return [];
     return Object.values(data.members);
   });
 
+  constructor() {
+    this.updateTrigger$.pipe(takeUntilDestroyed(), debounceTime(1500)).subscribe(() => {
+      this.liveService.updateMyEntry(this.sessionId(), this.myName(), this.myLog());
+    });
+  }
+
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.router.navigate(['/']); // Go home if no ID
+      this.router.navigate(['/']);
       return;
     }
     this.sessionId.set(id);
@@ -95,6 +104,10 @@ export class LiveSessionComponent implements OnInit {
   }
 
   // --- Actions ---
+
+  triggerUpdate() {
+    this.updateTrigger$.next();
+  }
 
   // When user types, save to DB (Debounce this in prod, but direct is ok for now)
   updateMyData() {

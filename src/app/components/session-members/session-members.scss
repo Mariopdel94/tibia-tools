@@ -1,0 +1,63 @@
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.member-chip {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: white;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s;
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  .member-info {
+    display: flex;
+    flex-direction: column;
+
+    .name {
+      font-weight: 600;
+      color: #333;
+    }
+    .status {
+      font-size: 0.8rem;
+      color: #999;
+    }
+  }
+
+  /* Ready State */
+  &.ready {
+    border-color: #a5d6a7;
+    background: #f1f8e9;
+
+    .avatar {
+      background: var(--ready-color);
+      color: white;
+    }
+
+    .member-info .status {
+      color: var(--ready-color);
+      font-weight: 500;
+    }
+  }
+}

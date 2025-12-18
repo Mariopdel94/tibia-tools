@@ -38,23 +38,20 @@ const CLEANUP_THRESHOLD = 0.75; // Only clean if we are at 75% capacity
 @Injectable({ providedIn: 'root' })
 export class LiveSessionService {
   private firestore = inject(Firestore);
+  readonly myUserId = this.getOrInitUserId();
 
-  // Identity Management (No Login required)
-  readonly myUserId: string;
-
-  constructor() {
-    // Generate or retrieve a persistent ID for this browser
+  private getOrInitUserId(): string {
     let storedId = localStorage.getItem('tibia-user-id');
     if (!storedId) {
       storedId = crypto.randomUUID();
       localStorage.setItem('tibia-user-id', storedId);
     }
-    this.myUserId = storedId;
+    return storedId;
   }
 
   // Create a new Session (You become Leader)
   async createSession(): Promise<string> {
-    this.cleanupOldSessions();
+    this.cleanupOldSessions().catch((err) => console.warn('Cleanup warning', err));
     const sessionsColl = collection(this.firestore, 'sessions');
     const newDoc = await addDoc(sessionsColl, {
       createdAt: Date.now(),

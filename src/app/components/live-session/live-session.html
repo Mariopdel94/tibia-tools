@@ -32,7 +32,7 @@
           <input
             matInput
             [ngModel]="myName()"
-            (ngModelChange)="myName.set($event); updateMyData()"
+            (ngModelChange)="myName.set($event); triggerUpdate()"
             placeholder="e.g. Eternal Oblivion"
           />
         </mat-form-field>
@@ -42,7 +42,7 @@
           <textarea
             matInput
             [ngModel]="myLog()"
-            (ngModelChange)="myLog.set($event); updateMyData()"
+            (ngModelChange)="myLog.set($event); triggerUpdate()"
             placeholder="Paste 'Looted Items:...' here"
           ></textarea>
         </mat-form-field>
@@ -74,19 +74,7 @@
 
         <div class="lobby-section">
           <h3>Lobby Status</h3>
-          <div class="members-list">
-            @for(m of memberList(); track m.id) {
-            <div class="member-chip" [class.ready]="m.log.length > 10">
-              <div class="avatar">
-                <mat-icon>{{ m.log.length > 10 ? 'check_circle' : 'hourglass_empty' }}</mat-icon>
-              </div>
-              <div class="member-info">
-                <span class="name">{{ m.name || 'Unknown' }}</span>
-                <span class="status">{{ m.log.length > 10 ? 'Ready' : 'Not Ready' }}</span>
-              </div>
-            </div>
-            }
-          </div>
+          <app-session-members [members]="memberList()" />
         </div>
       </mat-card-content>
 
@@ -116,16 +104,7 @@
 
         <div class="lobby-section">
           <h3>Members Ready</h3>
-          <div class="members-list">
-            @for(m of memberList(); track m.id) {
-            <div class="member-chip" [class.ready]="m.log.length > 10">
-              <div class="avatar">
-                <mat-icon>{{ m.log.length > 10 ? 'check' : 'more_horiz' }}</mat-icon>
-              </div>
-              <span class="name">{{ m.name || 'Joining...' }}</span>
-            </div>
-            }
-          </div>
+          <app-session-members [members]="memberList()" />
         </div>
       </mat-card-content>
     </mat-card>
@@ -144,16 +123,7 @@
       <mat-card-content>
         <div class="lobby-section">
           <h3>Members</h3>
-          <div class="members-list">
-            @for(m of memberList(); track m.id) {
-            <div class="member-chip" [class.ready]="m.log.length > 10">
-              <div class="avatar">
-                <mat-icon>{{ m.log.length > 10 ? 'check' : 'more_horiz' }}</mat-icon>
-              </div>
-              <span class="name">{{ m.name || 'Joining...' }}</span>
-            </div>
-            }
-          </div>
+          <app-session-members [members]="memberList()" />
         </div>
         <p class="success-text">Scroll down to see your transfer details and summary.</p>
         <button mat-stroked-button class="scroll-btn" (click)="scrollToResults()">
