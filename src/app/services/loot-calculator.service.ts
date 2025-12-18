@@ -30,7 +30,7 @@ export class LootCalculatorService {
    * Parses the raw text from the Party Hunt Analyzer.
    * Extracts balance and preserves the original casing of the player name.
    */
-  parsePartyLog(log: string): Record<string, { balance: number; originalName: string }> {
+  private parsePartyLog(log: string): Record<string, { balance: number; originalName: string }> {
     const result: Record<string, { balance: number; originalName: string }> = {};
     const lines = log.split('\n');
     let currentPlayer = '';
@@ -61,7 +61,7 @@ export class LootCalculatorService {
    * Parses a single session log to find Creature Products.
    * @returns A map of ItemName -> Quantity
    */
-  parseSessionLog(log: string): Record<string, number> {
+  private parseSessionLog(log: string): Record<string, number> {
     const loot: Record<string, number> = {};
     const lines = log.split('\n');
     let isLootSection = false;
@@ -101,7 +101,7 @@ export class LootCalculatorService {
 
   // --- Calculations ---
 
-  public calculate(partyLog: string, players: PlayerInput[]): LootResult {
+  calculate(partyLog: string, players: PlayerInput[]): LootResult {
     const sessionLogs: Record<string, string> = {};
     const validPlayers = players.filter((p) => p.name.trim() && p.log.trim());
     validPlayers.forEach((p) => (sessionLogs[p.name.trim().toLowerCase()] = p.log));
@@ -113,7 +113,7 @@ export class LootCalculatorService {
   /**
    * Core logic to determine who owes what (items and gold).
    */
-  calculateDistribution(
+  private calculateDistribution(
     sessionLogs: Record<string, string>,
     partyData: Record<string, { balance: number; originalName: string }>,
     allPlayers: PlayerInput[]
@@ -191,7 +191,7 @@ export class LootCalculatorService {
   /**
    * Generates instructions for distributing physical items evenly.
    */
-  resolveItemSplits(
+  private resolveItemSplits(
     playerIds: string[],
     globalLoot: Record<string, number>,
     playerInventories: Record<string, Record<string, number>>,
@@ -233,7 +233,7 @@ export class LootCalculatorService {
   /**
    * Generates instructions for distributing Gold based on liquid balance.
    */
-  resolveFinancials(
+  private resolveFinancials(
     playerIds: string[],
     partyData: Record<string, { balance: number }>,
     playerProductValue: Record<string, number>,
@@ -281,7 +281,7 @@ export class LootCalculatorService {
    * @param balances Array of objects containing ID and the Value (Positive = Surplus, Negative = Deficit).
    * @param tolerance Ignore remainders smaller than this (e.g. 1gp).
    */
-  solveTransfers(
+  private solveTransfers(
     balances: { id: string; val: number }[],
     tolerance = 0
   ): { from: string; to: string; amount: number }[] {
@@ -312,7 +312,7 @@ export class LootCalculatorService {
   }
 
   /** Groups flat item transfer instructions into batches per player-pair. */
-  groupItemTransfers(instructions: TransferInstruction[]): GroupedItemTransfer[] {
+  private groupItemTransfers(instructions: TransferInstruction[]): GroupedItemTransfer[] {
     const map = new Map<string, GroupedItemTransfer>();
 
     for (const ins of instructions) {

@@ -1,4 +1,4 @@
-import { Component, inject, model, output } from '@angular/core';
+import { Component, model, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -12,7 +12,6 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { PlayerInput } from '../../models/creature-product-splitter';
-import { LootCalculatorService } from '../../services/loot-calculator.service';
 
 @Component({
   selector: 'app-loot-form',
@@ -33,7 +32,6 @@ import { LootCalculatorService } from '../../services/loot-calculator.service';
   styleUrl: './loot-form.scss',
 })
 export class LootForm {
-  lootCalculator = inject(LootCalculatorService);
   partyLogInput = model.required<string>();
   players = model.required<PlayerInput[]>();
   calculate = output<{ partyLog: string; players: PlayerInput[] }>();
