@@ -19,10 +19,10 @@
       <h3>How it Works</h3>
       <p>
         This tool merges <strong>Individual Session Logs</strong> with the
-        <strong>Party Hunt Analyzer</strong>
-        to calculate a fair split. It identifies who looted creature products, deducts their NPC
-        value from that player's balance, and generates instructions to distribute both the physical
-        items and the gold profit evenly among all members.
+        <strong>Party Hunt Analyzer</strong> to calculate a fair split. It identifies who looted
+        creature products, deducts their NPC value from that player's balance, and generates
+        instructions to distribute both the physical items and the gold profit evenly among all
+        members.
       </p>
     </div>
   </div>
@@ -58,7 +58,7 @@
             type="button"
             color="warn"
             (click)="removePlayer(player.id)"
-            [disabled]="players().length <= 1"
+            [disabled]="players().length <= 2"
             aria-label="Remove player"
           >
             <mat-icon>delete</mat-icon>
@@ -164,20 +164,21 @@
           <p>Balances are equal. No transfers needed.</p>
           }
           <div class="instruction-list">
-            @for (ins of res.goldInstructions; track $index) {
+            @for (ins of res.goldInstructions; track ins.from + ins.to) {
             <div class="instruction-row gold-row">
               <div class="row-text">
                 <span class="player source">{{ ins.from }}</span>
                 <span class="arrow">transfer</span>
-                <span class="amount">{{ ins.amount }}</span>
+                <span class="amount">{{ ins.amount | number }}</span>
                 <span class="arrow">to</span>
                 <span class="player dest">{{ ins.to }}</span>
               </div>
               <button
                 mat-icon-button
+                type="button"
                 class="copy-btn"
                 (click)="copyTransfer(ins)"
-                title="Copy NPC Command: transfer {{ ins.amount }} to {{ ins.to }}"
+                title="Copy NPC Command"
               >
                 <mat-icon>content_copy</mat-icon>
               </button>
@@ -198,7 +199,7 @@
           <p class="empty-text">No item trades needed.</p>
           }
           <div class="instruction-list">
-            @for (group of res.groupedItemInstructions; track $index) {
+            @for (group of res.groupedItemInstructions; track group.from + group.to) {
             <div class="trade-group">
               <div class="trade-header">
                 <span class="player source">{{ group.from }}</span>
@@ -227,23 +228,23 @@
           <mat-card-subtitle>Total Value: {{ res.totalValue | number }} gp</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          @if ((res.totalLoot | keyvalue).length === 0) {
+          @if (res.totalLoot.length === 0) {
           <p class="empty-text">No creature products found.</p>
           }
           <mat-chip-set>
-            @for (item of res.totalLoot | keyvalue; track item.key) {
+            @for (item of res.totalLoot; track item.name) {
             <mat-chip class="loot-chip">
-              <span class="chip-qty">{{ item.value }}x</span> {{ item.key }}
+              <span class="chip-qty">{{ item.amount }}x</span> {{ item.name }}
             </mat-chip>
             }
           </mat-chip-set>
 
-          @if ((res.remainder | keyvalue).length > 0) {
+          @if (res.remainder.length > 0) {
           <mat-divider style="margin: 1rem 0"></mat-divider>
           <div class="remainder-section">
             <small>Remainder (Unsplit):</small>
-            @for (item of res.remainder | keyvalue; track item.key) {
-            <span class="remainder-item">{{ item.value }}x {{ item.key }}</span>
+            @for (item of res.remainder; track item.name) {
+            <span class="remainder-item">{{ item.amount }}x {{ item.name }}</span>
             }
           </div>
           }

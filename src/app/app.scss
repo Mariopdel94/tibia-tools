@@ -1,276 +1,66 @@
+/* -------------------------------------------------------------------------- */
+/* 1. VARIABLES & THEME                                                       */
+/* -------------------------------------------------------------------------- */
+:host {
+  // Primary & Identity
+  --color-primary: #3f51b5;
+  --color-primary-light: #e8eaf6;
+  --color-primary-dark: #1a237e;
+  --color-accent: #ff4081; /* Pink for hearts */
+
+  // Status Colors
+  --color-success: #2e7d32; /* Profit */
+  --color-danger: #c62828; /* Waste/Delete */
+  --color-gold: #fbc02d; /* Tibia Coins/Gold Icon */
+
+  // Backgrounds & Surfaces
+  --bg-body: #fafafa;
+  --bg-card: #ffffff;
+  --bg-gold: #fffcf0;
+
+  // Text
+  --text-main: #2c3e50;
+  --text-muted: #607d8b;
+
+  // Layout
+  --radius-md: 8px;
+  --spacing-md: 1.5rem;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 2. LAYOUT & GLOBAL                                                         */
+/* -------------------------------------------------------------------------- */
 .container {
-  max-width: 1300px;
+  max-width: 1400px; /* Increased slightly to breathe */
   margin: 0 auto;
   padding: 2rem;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 2rem;
-
-  h1 {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-size: 2rem;
-    color: #3f51b5; // Primary Material Color
-  }
-}
-
-.player-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.player-card {
-  display: flex;
-  flex-direction: column;
-
-  mat-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-  }
+  color: var(--text-main);
 }
 
 .full-width {
   width: 100%;
 }
 
-.log-field textarea {
-  font-family: monospace;
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.add-player-btn {
-  border: 2px dashed #ccc;
-  background: transparent;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #666;
-
-  mat-icon {
-    font-size: 48px;
-    height: 48px;
-    width: 48px;
-    margin-bottom: 1rem;
-  }
-
-  &:hover {
-    border-color: #3f51b5;
-    color: #3f51b5;
-    background-color: rgba(63, 81, 181, 0.04);
-  }
-}
-
-.actions {
-  display: flex;
-  justify-content: center;
-  margin: 2rem 0;
-}
-
-.results-container {
-  margin-top: 3rem;
-
-  h2 {
-    margin: 1.5rem 0;
-    text-align: center;
-  }
-}
-
-.results-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.result-card {
-  height: 100%;
-}
-
-.empty-state {
-  color: #888;
-  font-style: italic;
-}
-
-.instruction-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.instruction-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1rem;
-  padding: 8px;
-  background: #f5f5f5;
-  border-radius: 4px;
-  flex-wrap: wrap;
-
-  .player {
-    font-weight: bold;
-    color: #333;
-  }
-
-  .amount {
-    font-weight: bold;
-    color: #3f51b5;
-  }
-
-  .arrow {
-    color: #666;
-    font-size: 0.9em;
-  }
-}
-
-.results-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-  margin: 1.5rem 0;
-
-  h2 {
-    margin: 0;
-  }
-
-  .total-value {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #4caf50; // Green for money
-    font-weight: bold;
-    font-size: 1.2rem;
-    background: rgba(76, 175, 80, 0.1);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-  }
-}
-
-.settlement-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
-
-.gold-card {
-  border: 1px solid #ffd700; // Gold border
-  background-color: #fffcf0;
-
-  .gold-icon {
-    color: #fbc02d;
-  }
-}
-
-.gold-row {
-  background: rgba(255, 215, 0, 0.15);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between; // Pushes text left, button right
-  padding: 4px 12px; // Adjusted padding
-
-  .row-text {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    flex: 1;
-  }
-
-  .amount {
-    color: #bf360c;
-    font-size: 1.1em;
-    font-weight: bold;
-  }
-
-  .copy-btn {
-    color: #bf360c;
-    opacity: 0.6;
-    transition: all 0.2s;
-
-    // Make icon slightly smaller to fit row nicely
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-
-    &:hover {
-      opacity: 1;
-      background-color: rgba(255, 215, 0, 0.2);
-    }
-  }
-}
-
-.source {
-  color: #d32f2f;
-  font-weight: bold;
-}
-.dest {
-  color: #388e3c;
-  font-weight: bold;
-}
-
-.product-card {
-  .loot-chip {
-    font-weight: 500;
-    .chip-qty {
-      font-weight: bold;
-      margin-right: 4px;
-    }
-  }
-
-  .remainder-section {
-    color: #666;
-    font-size: 0.85rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .remainder-item {
-    background: #eee;
-    padding: 2px 6px;
-    border-radius: 4px;
-  }
-}
-
-.empty-text {
-  color: #999;
-  font-style: italic;
-  text-align: center;
-  margin-top: 1rem;
-}
-
+/* -------------------------------------------------------------------------- */
+/* 3. HEADER & HERO                                                           */
+/* -------------------------------------------------------------------------- */
 .header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 
   h1 {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    color: #3f51b5;
+    color: var(--color-primary); /* Fixed Color */
+    margin: 0 0 1rem 0;
+
+    mat-icon {
+      color: var(--color-primary); /* Ensure icon matches */
+    }
   }
 }
 
@@ -278,137 +68,377 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: #fff;
+  background: white;
   border: 1px solid #e0e0e0;
-  padding: 8px 24px;
+  padding: 0.5rem 1.5rem;
   border-radius: 50px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  font-size: 0.95rem;
-  color: #666;
-  margin-top: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  color: var(--text-muted);
 
   .heart-icon {
-    font-size: 18px;
-    height: 18px;
-    width: 18px;
-    color: #e91e63;
+    color: var(--color-accent);
   }
-
   strong {
-    color: #3f51b5;
-    font-weight: 600;
+    color: var(--color-primary);
   }
-
   .tibia-coin {
-    color: #fbc02d;
-    font-weight: bold;
+    color: var(--color-gold);
+    font-weight: 700;
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/* 4. INFO BOX                                                                */
+/* -------------------------------------------------------------------------- */
 .info-section {
-  background: #e8eaf6; // Very light Indigo/Blue
-  border-left: 4px solid #3f51b5; // Matching Primary Color
+  background: var(--color-primary-light);
+  border-left: 4px solid var(--color-primary);
   padding: 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
   border-radius: 4px;
   display: flex;
   gap: 1.5rem;
-  align-items: flex-start;
   max-width: 900px;
   margin-left: auto;
   margin-right: auto;
 
   .info-icon {
-    background: #fff;
+    background: white;
     border-radius: 50%;
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     flex-shrink: 0;
-
     mat-icon {
-      color: #3f51b5;
+      color: var(--color-primary);
     }
   }
 
   .info-content {
     h3 {
       margin: 0 0 0.5rem 0;
-      color: #1a237e;
-      font-size: 1.1rem;
-      font-weight: 600;
+      color: var(--color-primary-dark);
     }
-
     p {
       margin: 0;
-      line-height: 1.6;
+      line-height: 1.5;
       color: #455a64;
-      font-size: 0.95rem;
     }
-
     strong {
-      color: #283593;
+      color: var(--color-primary-dark);
     }
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/* 5. PLAYER GRID & INPUTS                                                    */
+/* -------------------------------------------------------------------------- */
+.party-log-card {
+  margin-bottom: 2rem;
+  border: 1px solid #e0e0e0;
+}
+
+.player-grid {
+  display: grid;
+  // Adjusted minmax to 250px so 4 items fit in 1 row (4x250 = 1000px < 1300px)
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.player-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e0e0e0;
+
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+
+    // Explicitly target the delete button color
+    button[color='warn'] {
+      color: var(--color-danger) !important;
+    }
+  }
+}
+
+.log-field textarea {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #333;
+}
+
+.add-player-btn {
+  border: 2px dashed #ccc;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #757575;
+
+  mat-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+    margin-bottom: 1rem;
+    color: #bdbdbd; /* Light gray initially */
+    transition: color 0.2s;
+  }
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background-color: var(--color-primary-light);
+
+    mat-icon {
+      color: var(--color-primary); /* Color on hover */
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  margin: 3rem 0;
+
+  button {
+    padding: 0 3rem;
+    height: 54px;
+    font-size: 1.1rem;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* 6. RESULTS - FINANCIAL TABLE                                               */
+/* -------------------------------------------------------------------------- */
+.results-container {
+  margin-top: 3rem;
+
+  h2 {
+    text-align: center;
+    margin: 2rem 0;
+    color: var(--text-main);
+  }
+}
+
+.financial-section {
+  max-width: 900px;
+  margin: 0 auto 3rem;
+}
+
+.financial-table {
+  width: 100%;
+
+  th {
+    background: #f5f5f5;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+  }
+
+  td {
+    font-size: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  // Value Colors
+  .negative-val {
+    color: var(--color-danger);
+    font-weight: 500;
+  }
+  .profit strong {
+    color: var(--color-success);
+  }
+  .waste strong {
+    color: var(--color-danger);
+  }
+}
+
+.party-total {
+  margin-top: 1rem;
+  float: right;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 7. RESULTS - CARDS GRID                                                    */
+/* -------------------------------------------------------------------------- */
+.settlement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  clear: both;
+}
+
+.result-card {
+  height: 100%;
+
+  mat-card-header {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.empty-text {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  margin-top: 2rem;
+}
+
+/* --- Gold Card (Bank Transfers) --- */
+.gold-card {
+  border: 1px solid #ffd700; /* Fixed gold border */
+  background-color: #fffcf0; /* Fixed gold bg */
+
+  .gold-icon {
+    color: var(--color-gold);
+  }
+}
+
+.gold-row {
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 0.5rem;
+
+  .row-text {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .amount {
+    color: #bf360c; /* Deep Orange for numbers */
+    font-weight: 700;
+    font-family: 'Roboto Mono', monospace;
+  }
+
+  .copy-btn {
+    color: #bf360c;
+    opacity: 0.5;
+    &:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.05);
+    }
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+/* --- Trade Groups --- */
 .trade-group {
-  background: #f5f5f5;
+  background: white;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 0;
   margin-bottom: 1rem;
   overflow: hidden;
 
   .trade-header {
-    background: #e8eaf6; // Light indigo
+    background: #f5f5f5;
     padding: 8px 12px;
+    font-size: 0.9rem;
     display: flex;
-    align-items: center;
     gap: 8px;
-    border-bottom: 1px solid #dcdcdc;
-    font-size: 0.95rem;
+    align-items: center;
+    border-bottom: 1px solid #eee;
 
     .arrow-text {
-      color: #777;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-weight: 700;
+      color: #999;
     }
   }
 
   .trade-items {
-    padding: 8px 12px;
+    padding: 10px 12px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
   }
 
   .trade-item-row {
-    font-family: monospace; // Tries to mimic game log look
-    font-size: 0.95rem;
-    color: #333;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.9rem;
     display: flex;
-    gap: 8px;
+    gap: 10px;
 
     .qty {
-      font-weight: bold;
-      color: #3f51b5;
-      min-width: 30px; // align text nicely
+      font-weight: 700;
+      color: var(--color-primary);
+      min-width: 30px;
       text-align: right;
+    }
+    .name {
+      color: #333;
     }
   }
 }
 
-// Keep your existing player colors
+/* --- Product Summary --- */
+.product-card {
+  .loot-chip {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    font-weight: 500;
+    .chip-qty {
+      font-weight: 800;
+      margin-right: 5px;
+    }
+  }
+
+  .remainder-section {
+    background: #fafafa;
+    padding: 1rem;
+    border-radius: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    color: #666;
+  }
+
+  .remainder-item {
+    background: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    color: #444;
+  }
+}
+
+/* Utilities */
 .source {
-  color: #d32f2f;
-  font-weight: bold;
+  color: var(--color-danger);
+  font-weight: 700;
 }
 .dest {
-  color: #388e3c;
-  font-weight: bold;
+  color: var(--color-success);
+  font-weight: 700;
 }

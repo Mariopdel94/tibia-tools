@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -31,13 +31,13 @@ interface TransferInstruction {
   from: string;
   to: string;
   amount: number;
-  item?: string; // Optional: if present, it's an item transfer. If missing, it's Gold.
+  item?: string;
 }
 
 interface LootResult {
-  totalLoot: Record<string, number>;
+  totalLoot: { name: string; amount: number }[];
   totalValue: number;
-  remainder: Record<string, number>;
+  remainder: { name: string; amount: number }[];
   groupedItemInstructions: GroupedItemTransfer[];
   goldInstructions: TransferInstruction[];
   financials: FinancialResult[];
@@ -48,6 +48,12 @@ interface GroupedItemTransfer {
   to: string;
   items: { name: string; amount: number }[];
 }
+
+const REGEX_HEADER = /^(Session|Loot|Supplies|Balance|Damage|Healing)/;
+const REGEX_LEADER_SUFFIX = /\s\(Leader\)$/i;
+const REGEX_LOOT_LINE = /^(\d+)x\s+(.+)$/;
+const REGEX_ARTICLE_PREFIX = /^(a|an)\s+/i;
+const REGEX_DIGIT_START = /^\d/;
 
 @Component({
   selector: 'app-root',
@@ -65,24 +71,31 @@ interface GroupedItemTransfer {
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
-  partyLogInput = signal<string>('');
   protected readonly title = signal('tibia-creature-product-split');
+
   // --- State ---
-  // We start with two empty slots for convenience
-  players = signal<PlayerInput[]>([
+  readonly partyLogInput = signal<string>('');
+  readonly players = signal<PlayerInput[]>([
     { id: 1, name: '', log: '' },
     { id: 2, name: '', log: '' },
     { id: 3, name: '', log: '' },
     { id: 4, name: '', log: '' },
   ]);
-
-  results = signal<LootResult | null>(null);
-  displayedColumns: string[] = ['name', 'original', 'deduction', 'final'];
+  readonly results = signal<LootResult | null>(null);
+  readonly displayedColumns: string[] = ['name', 'original', 'deduction', 'final'];
+  // Memoized map of product names to avoid rebuilding it on every click
+  private readonly productMap: Map<string, { realName: string; price: number }> = (() => {
+    const map = new Map();
+    Object.entries(CREATURE_PRODUCTS).forEach(([key, price]) => {
+      map.set(key.toLowerCase().trim(), { realName: key, price });
+    });
+    return map;
+  })();
 
   // --- Actions ---
-
   addPlayer() {
     this.players.update((current) => [...current, { id: Date.now(), name: '', log: '' }]);
   }
@@ -91,269 +104,320 @@ export class App {
     this.players.update((current) => current.filter((p) => p.id !== id));
   }
 
-  // Helper to normalize the product list once for case-insensitive lookup
-  // We map "vampire teeth" (lower) -> { realName: "Vampire Teeth", price: 250 }
-  private getNormalizedProductMap() {
-    const map = new Map<string, { realName: string; price: number }>();
-    Object.entries(CREATURE_PRODUCTS).forEach(([key, price]) => {
-      map.set(key.toLowerCase().trim(), { realName: key, price });
+  /** Copies the transfer instruction to clipboard formatted for Tibia NPC. */
+  copyTransfer(ins: TransferInstruction): void {
+    const command = `transfer ${ins.amount} to ${ins.to}`;
+    navigator.clipboard.writeText(command).then(() => {
+      console.info('Copied to clipboard:', command);
     });
-    return map;
   }
 
+  /**
+   * Main Orchestrator:
+   * 1. Normalizes inputs.
+   * 2. Parses logs.
+   * 3. Calculates splits.
+   * 4. Updates state.
+   */
   processLogs() {
     const sessionLogs: Record<string, string> = {};
     const validPlayers = this.players().filter((p) => p.name.trim() && p.log.trim());
 
-    // We allow processing even if only Party Log is present (though deduction won't happen)
+    // Normalize keys to lowercase for consistent matching
     validPlayers.forEach((p) => (sessionLogs[p.name.trim().toLowerCase()] = p.log));
 
-    const partyData = this.parsePartyAnalyzer(this.partyLogInput());
+    const partyData = this.parsePartyLog(this.partyLogInput());
     const result = this.calculateDistribution(sessionLogs, partyData);
     this.results.set(result);
   }
 
-  private parsePartyAnalyzer(
-    log: string
-  ): Record<string, { balance: number; originalName: string }> {
+  // --- Parsers ---
+  /**
+   * Parses the raw text from the Party Hunt Analyzer.
+   * Extracts balance and preserves the original casing of the player name.
+   */
+  private parsePartyLog(log: string): Record<string, { balance: number; originalName: string }> {
     const result: Record<string, { balance: number; originalName: string }> = {};
     const lines = log.split('\n');
     let currentPlayer = '';
 
-    const isHeaderLine = (l: string) => /^(Session|Loot|Supplies|Balance|Damage|Healing)/.test(l);
-    const getNumber = (l: string) => parseInt(l.replace(/,/g, ''), 10) || 0;
-
-    for (let line of lines) {
+    for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed) continue;
 
-      if (!isHeaderLine(trimmed) && !/^\d/.test(trimmed)) {
-        currentPlayer = trimmed.replace(/\s\(Leader\)$/i, '').trim();
+      // Identify Player Name Line (Not a header, doesn't start with number)
+      if (!REGEX_HEADER.test(trimmed) && !REGEX_DIGIT_START.test(trimmed)) {
+        currentPlayer = trimmed.replace(REGEX_LEADER_SUFFIX, '').trim();
         continue;
       }
 
+      // Identify Balance Line
       if (currentPlayer && trimmed.startsWith('Balance:')) {
         const parts = trimmed.split(':');
         if (parts.length > 1) {
-          result[currentPlayer.toLowerCase()] = {
-            balance: getNumber(parts[1]),
-            originalName: currentPlayer,
-          };
+          const balance = parseInt(parts[1].replace(/,/g, ''), 10) || 0;
+          result[currentPlayer.toLowerCase()] = { balance, originalName: currentPlayer };
         }
       }
     }
     return result;
   }
 
+  /**
+   * Parses a single session log to find Creature Products.
+   * @returns A map of ItemName -> Quantity
+   */
+  private parseSessionLog(log: string): Record<string, number> {
+    const loot: Record<string, number> = {};
+    const lines = log.split('\n');
+    let isLootSection = false;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      if (trimmed.startsWith('Looted Items:')) {
+        isLootSection = true;
+        continue;
+      }
+
+      if (isLootSection) {
+        // Exit section if line is empty or doesn't match "1x Item" pattern
+        if (trimmed === '' || !REGEX_DIGIT_START.test(trimmed)) {
+          if (trimmed !== '') break;
+          continue;
+        }
+
+        const match = trimmed.match(REGEX_LOOT_LINE);
+        if (match) {
+          const amount = parseInt(match[1], 10);
+          const rawName = match[2];
+
+          // Normalize: remove "a/an", trim, lowercase
+          const cleanName = rawName.trim().replace(REGEX_ARTICLE_PREFIX, '').trim().toLowerCase();
+
+          if (this.productMap.has(cleanName)) {
+            const { realName } = this.productMap.get(cleanName)!;
+            loot[realName] = (loot[realName] || 0) + amount;
+          }
+        }
+      }
+    }
+    return loot;
+  }
+
+  // --- Calculations ---
+  /**
+   * Core logic to determine who owes what (items and gold).
+   */
   private calculateDistribution(
     sessionLogs: Record<string, string>,
     partyData: Record<string, { balance: number; originalName: string }>
   ): LootResult {
-    const productMap = this.getNormalizedProductMap();
-    const uniqueNames = new Set([...Object.keys(partyData), ...Object.keys(sessionLogs)]);
-    const playerIds = Array.from(uniqueNames);
-    const playerNames =
-      Object.keys(partyData).length > 0 ? Object.keys(partyData) : Object.keys(sessionLogs);
+    // 1. Unify Player IDs
+    const uniqueIds = new Set([...Object.keys(partyData), ...Object.keys(sessionLogs)]);
+    const playerIds = Array.from(uniqueIds);
 
+    // Helper to resolve display names (Party Log Name > Input Name > ID)
     const getDisplayName = (id: string) => {
       if (partyData[id]) return partyData[id].originalName;
-      // If not in party log, try to find it in the input array (this acts as a fallback)
       const inputPlayer = this.players().find((p) => p.name.trim().toLowerCase() === id);
       return inputPlayer ? inputPlayer.name : id;
     };
 
-    const playerProductValue: Record<string, number> = {};
-    const globalTotal: Record<string, number> = {};
+    // 2. Aggregate Data
+    const globalLoot: Record<string, number> = {};
     const playerInventories: Record<string, Record<string, number>> = {};
+    const playerProductValue: Record<string, number> = {};
     let totalCreatureValue = 0;
 
-    // 1. Parse Items & Value
-    const parseLog = (log: string) => {
-      const loot: Record<string, number> = {};
-      const lines = log.split('\n');
-      let processing = false;
-      for (let line of lines) {
-        const trimmed = line.trim();
-        if (trimmed.startsWith('Looted Items:')) {
-          processing = true;
-          continue;
-        }
-        if (processing) {
-          if (trimmed === '' || !/^\d+x/.test(trimmed)) {
-            if (trimmed !== '') break;
-            continue;
-          }
-          const match = trimmed.match(/^(\d+)x\s+(.+)$/);
-          if (match) {
-            const amount = parseInt(match[1], 10);
-            const cleanName = match[2]
-              .trim()
-              .replace(/^(a|an)\s+/i, '')
-              .trim()
-              .toLowerCase();
-            if (productMap.has(cleanName)) {
-              const info = productMap.get(cleanName)!;
-              loot[info.realName] = (loot[info.realName] || 0) + amount;
-            }
-          }
-        }
-      }
-      return loot;
-    };
-
-    // Initialize values for all party members (even if they have no session log)
-    playerNames.forEach((p) => {
-      const log = sessionLogs[p];
-      const inv = log ? parseLog(log) : {};
-      playerInventories[p] = inv;
+    playerIds.forEach((pId) => {
+      const inv = sessionLogs[pId] ? this.parseSessionLog(sessionLogs[pId]) : {};
+      playerInventories[pId] = inv;
       let myHeldValue = 0;
 
       Object.entries(inv).forEach(([item, qty]) => {
-        globalTotal[item] = (globalTotal[item] || 0) + qty;
-        const price = productMap.get(item.toLowerCase())?.price || 0;
+        globalLoot[item] = (globalLoot[item] || 0) + qty;
+        const price = this.productMap.get(item.toLowerCase())?.price || 0;
         myHeldValue += qty * price;
       });
 
-      playerProductValue[p] = myHeldValue;
+      playerProductValue[pId] = myHeldValue;
       totalCreatureValue += myHeldValue;
     });
 
-    // 2. Item Splits (Physical Items)
-    const itemInstructions: TransferInstruction[] = [];
-    const remainder: Record<string, number> = {};
+    // 3. Calculate Item Splits
+    const { itemInstructions, remainder } = this.resolveItemSplits(
+      playerIds,
+      globalLoot,
+      playerInventories,
+      getDisplayName
+    );
 
-    for (const [item, totalQty] of Object.entries(globalTotal)) {
-      const target = Math.floor(totalQty / playerNames.length);
-      const leftOver = totalQty % playerNames.length;
-      if (leftOver > 0) remainder[item] = leftOver;
-      if (target === 0) continue;
+    // 4. Group Item Instructions by Player Pair (A -> B : [Items])
+    const groupedItemInstructions = this.groupItemTransfers(itemInstructions);
 
-      let givers: any[] = [];
-      let receivers: any[] = [];
+    // 5. Calculate Financials (Gold Splits)
+    const { financials, goldInstructions, partyBalance } = this.resolveFinancials(
+      playerIds,
+      partyData,
+      playerProductValue,
+      getDisplayName
+    );
 
-      playerNames.forEach((p) => {
-        const qty = playerInventories[p][item] || 0;
-        if (qty > target) givers.push({ player: p, surplus: qty - target });
-        else if (qty < target) receivers.push({ player: p, deficit: target - qty });
-      });
+    // Convert globalLoot Record to Array
+    const totalLootArray = Object.entries(globalLoot)
+      .map(([name, amount]) => ({ name, amount }))
+      .sort((a, b) => b.amount - a.amount); // Optional: Sort by quantity
 
-      let gIdx = 0,
-        rIdx = 0;
-      while (gIdx < givers.length && rIdx < receivers.length) {
-        const amt = Math.min(givers[gIdx].surplus, receivers[rIdx].deficit);
-        itemInstructions.push({
-          from: getDisplayName(givers[gIdx].player),
-          to: getDisplayName(receivers[rIdx].player),
-          item,
-          amount: amt,
-        });
-        givers[gIdx].surplus -= amt;
-        receivers[rIdx].deficit -= amt;
-        if (givers[gIdx].surplus === 0) gIdx++;
-        if (receivers[rIdx].deficit === 0) rIdx++;
-      }
-    }
-
-    const transferMap = new Map<string, GroupedItemTransfer>();
-
-    itemInstructions.forEach((ins) => {
-      // Create a unique key for the relationship
-      const key = `${ins.from}|${ins.to}`;
-
-      if (!transferMap.has(key)) {
-        transferMap.set(key, {
-          from: ins.from,
-          to: ins.to,
-          items: [],
-        });
-      }
-
-      transferMap.get(key)!.items.push({
-        name: ins.item!,
-        amount: ins.amount,
-      });
-    });
-
-    const groupedItemInstructions = Array.from(transferMap.values());
-
-    // 3. Financials & Gold Transfers
-    const financials: FinancialResult[] = [];
-    let totalPartyLiquidBalance = 0;
-
-    playerIds.forEach((p) => {
-      const originalBalance = partyData[p] ? partyData[p].balance : 0;
-      const deduction = playerProductValue[p] || 0;
-      const finalLiquid = originalBalance - deduction;
-
-      totalPartyLiquidBalance += finalLiquid;
-
-      financials.push({
-        name: getDisplayName(p),
-        originalBalance: originalBalance,
-        productValueDeducted: deduction,
-        finalLiquidBalance: finalLiquid,
-      });
-    });
-
-    // 4. Calculate Gold Transfers (Bank Settlement)
-    const goldInstructions: TransferInstruction[] = [];
-    const targetLiquidBalance = Math.floor(totalPartyLiquidBalance / playerIds.length);
-
-    let richPlayers: { name: string; surplus: number }[] = [];
-    let poorPlayers: { name: string; deficit: number }[] = [];
-
-    financials.forEach((f) => {
-      const diff = f.finalLiquidBalance - targetLiquidBalance;
-      if (diff > 1) {
-        // Tolerance of 1gp
-        richPlayers.push({ name: f.name, surplus: diff });
-      } else if (diff < -1) {
-        poorPlayers.push({ name: f.name, deficit: Math.abs(diff) });
-      }
-    });
-
-    // Sort to minimize transaction count (Largest -> Largest)
-    richPlayers.sort((a, b) => b.surplus - a.surplus);
-    poorPlayers.sort((a, b) => b.deficit - a.deficit);
-
-    let richIdx = 0,
-      poorIdx = 0;
-    while (richIdx < richPlayers.length && poorIdx < poorPlayers.length) {
-      const giver = richPlayers[richIdx];
-      const receiver = poorPlayers[poorIdx];
-
-      const transferAmt = Math.min(giver.surplus, receiver.deficit);
-
-      goldInstructions.push({
-        from: giver.name,
-        to: receiver.name,
-        amount: transferAmt,
-      });
-
-      giver.surplus -= transferAmt;
-      receiver.deficit -= transferAmt;
-
-      if (giver.surplus < 1) richIdx++;
-      if (receiver.deficit < 1) poorIdx++;
-    }
+    // Convert remainder Record to Array
+    const remainderArray = Object.entries(remainder).map(([name, amount]) => ({ name, amount }));
 
     return {
-      totalLoot: globalTotal,
+      totalLoot: totalLootArray,
       totalValue: totalCreatureValue,
-      remainder,
+      remainder: remainderArray,
       groupedItemInstructions,
-      goldInstructions, // Result of step 4
+      goldInstructions,
       financials,
-      partyBalance: totalPartyLiquidBalance,
+      partyBalance,
     };
   }
 
-  copyTransfer(ins: TransferInstruction) {
-    const command = `transfer ${ins.amount} to ${ins.to}`;
-    navigator.clipboard.writeText(command).then(() => {
-      // Optional: Visual feedback (console or alert, or just rely on UI)
-      // For a polished app, you might use MatSnackBar here
-      console.log('Copied:', command);
+  /**
+   * Generates instructions for distributing physical items evenly.
+   */
+  private resolveItemSplits(
+    playerIds: string[],
+    globalLoot: Record<string, number>,
+    playerInventories: Record<string, Record<string, number>>,
+    nameResolver: (id: string) => string
+  ) {
+    const itemInstructions: TransferInstruction[] = [];
+    const remainder: Record<string, number> = {};
+
+    for (const [item, totalQty] of Object.entries(globalLoot)) {
+      const count = playerIds.length;
+      const target = Math.floor(totalQty / count);
+      const leftOver = totalQty % count;
+
+      if (leftOver > 0) remainder[item] = leftOver;
+      if (target === 0) continue;
+
+      // Calculate surplus/deficit for this specific item
+      const balances = playerIds.map((pId) => ({
+        id: pId,
+        val: (playerInventories[pId][item] || 0) - target,
+      }));
+
+      // Solve transfers using generic solver
+      const transfers = this.solveTransfers(balances);
+
+      transfers.forEach((t) => {
+        itemInstructions.push({
+          from: nameResolver(t.from),
+          to: nameResolver(t.to),
+          item,
+          amount: t.amount,
+        });
+      });
+    }
+
+    return { itemInstructions, remainder };
+  }
+
+  /**
+   * Generates instructions for distributing Gold based on liquid balance.
+   */
+  private resolveFinancials(
+    playerIds: string[],
+    partyData: Record<string, { balance: number }>,
+    playerProductValue: Record<string, number>,
+    nameResolver: (id: string) => string
+  ) {
+    const financials: FinancialResult[] = [];
+    let totalLiquid = 0;
+
+    // Calculate Liquid Balance per player
+    const balances = playerIds.map((pId) => {
+      const original = partyData[pId]?.balance || 0;
+      const deducted = playerProductValue[pId] || 0;
+      const final = original - deducted;
+      totalLiquid += final;
+
+      financials.push({
+        name: nameResolver(pId),
+        originalBalance: original,
+        productValueDeducted: deducted,
+        finalLiquidBalance: final,
+      });
+
+      return { id: pId, val: final };
     });
+
+    const target = Math.floor(totalLiquid / playerIds.length);
+
+    // Adjust balances relative to target (Center around 0)
+    const relativeBalances = balances.map((b) => ({ ...b, val: b.val - target }));
+
+    // Solve transfers
+    const rawTransfers = this.solveTransfers(relativeBalances, 1); // 1gp tolerance
+
+    const goldInstructions = rawTransfers.map((t) => ({
+      from: nameResolver(t.from),
+      to: nameResolver(t.to),
+      amount: t.amount,
+    }));
+
+    return { financials, goldInstructions, partyBalance: totalLiquid };
+  }
+
+  /**
+   * Generic solver to balance surpluses and deficits.
+   * @param balances Array of objects containing ID and the Value (Positive = Surplus, Negative = Deficit).
+   * @param tolerance Ignore remainders smaller than this (e.g. 1gp).
+   */
+  private solveTransfers(
+    balances: { id: string; val: number }[],
+    tolerance = 0
+  ): { from: string; to: string; amount: number }[] {
+    const rich = balances.filter((b) => b.val > tolerance).sort((a, b) => b.val - a.val); // Descending
+    const poor = balances.filter((b) => b.val < -tolerance).sort((a, b) => a.val - b.val); // Ascending (Largest deficit first)
+
+    const instructions: { from: string; to: string; amount: number }[] = [];
+    let rIdx = 0;
+    let pIdx = 0;
+
+    while (rIdx < rich.length && pIdx < poor.length) {
+      const giver = rich[rIdx];
+      const receiver = poor[pIdx];
+
+      const deficit = Math.abs(receiver.val);
+      const amount = Math.min(giver.val, deficit);
+
+      instructions.push({ from: giver.id, to: receiver.id, amount });
+
+      giver.val -= amount;
+      receiver.val += amount; // Reduces deficit toward 0
+
+      if (giver.val <= tolerance) rIdx++;
+      if (Math.abs(receiver.val) <= tolerance) pIdx++;
+    }
+
+    return instructions;
+  }
+
+  /** Groups flat item transfer instructions into batches per player-pair. */
+  private groupItemTransfers(instructions: TransferInstruction[]): GroupedItemTransfer[] {
+    const map = new Map<string, GroupedItemTransfer>();
+
+    for (const ins of instructions) {
+      const key = `${ins.from}|${ins.to}`;
+      if (!map.has(key)) {
+        map.set(key, { from: ins.from, to: ins.to, items: [] });
+      }
+      map.get(key)!.items.push({ name: ins.item!, amount: ins.amount });
+    }
+
+    return Array.from(map.values());
   }
 }
