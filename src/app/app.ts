@@ -93,11 +93,23 @@ export class App implements OnInit {
 
   async generateShortShareLink() {
     const { longUrl, hash } = this.generateLongShareLink(false);
+    let finalUrl = longUrl;
 
-    // Try to shorten it
-    this.isGeneratingTinyUrl.set(true);
-    const finalUrl = await this.shareService.shortenUrl(longUrl);
-    this.isGeneratingTinyUrl.set(false);
+    try {
+      this.isGeneratingTinyUrl.set(true);
+      finalUrl = await this.shareService.shortenUrl(longUrl);
+      this.isGeneratingTinyUrl.set(false);
+    } catch (error: any) {
+      this.isGeneratingTinyUrl.set(false);
+      if (error.message === 'QUOTA_EXCEEDED') {
+        this.snackBar.open('Monthly TinyURL limit reached. Using long link instead.', 'Got it', {
+          duration: 5000,
+          panelClass: ['warning-snackbar'],
+        });
+      } else {
+        console.warn('Shortener failed, falling back to long URL.');
+      }
+    }
     this.copyShareLink(finalUrl, hash);
   }
 

@@ -72,3 +72,9 @@ body {
   margin: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
+
+.warning-snackbar {
+  --mat-snack-bar-container-color: #d32f2f; // Red background
+  --mat-snack-bar-supporting-text-color: white; // White text
+  --mat-snack-bar-button-color: #ffd700; // Gold button text
+}

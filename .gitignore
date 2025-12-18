@@ -43,3 +43,6 @@ __screenshots__/
 Thumbs.db
 .firebaserc
 firebase.json
+
+src/environments/environment.development.ts
+src/environments/environment.ts
