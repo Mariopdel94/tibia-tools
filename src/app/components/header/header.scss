@@ -23,6 +23,7 @@
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap; // Stacks on mobile
+  flex-direction: column;
 }
 
 .support-banner {

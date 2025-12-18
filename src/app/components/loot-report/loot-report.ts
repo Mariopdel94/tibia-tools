@@ -29,6 +29,7 @@ export class LootReport {
   isLoadingShortUrlGeneration = input<boolean>(false);
   shareLongUrl = output<void>();
   shareShortUrl = output<void>();
+  canShareUrls = input<boolean>(true);
   readonly displayedColumns = ['name', 'original', 'deduction', 'final'];
 
   /** Copies the transfer instruction to clipboard formatted for Tibia NPC. */

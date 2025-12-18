@@ -42,6 +42,7 @@
 
     <div class="center-xy" style="margin-top: 1rem">
       <div class="party-total">Total Liquid Profit: {{ res.partyBalance | number }} gp</div>
+      @if (canShareUrls()) {
       <button
         mat-flat-button
         color="accent"
@@ -63,6 +64,7 @@
         <mat-icon>share</mat-icon>
         Generate Long Share Link
       </button>
+      }
     </div>
   </div>
 

@@ -166,7 +166,7 @@
 
   @if (results(); as res) {
   <div class="results-wrapper">
-    <app-loot-report [result]="res"></app-loot-report>
+    <app-loot-report [canShareUrls]="false" [result]="res"></app-loot-report>
   </div>
   } } @else {
   <div class="loading-container">
