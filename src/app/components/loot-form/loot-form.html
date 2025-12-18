@@ -1,0 +1,79 @@
+<form #lootForm="ngForm" (ngSubmit)="onSubmit()">
+  <mat-card class="party-log-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Party Hunt Analyzer</mat-card-title>
+      <mat-card-subtitle>Paste the party log with Balance info</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-form-field appearance="outline" class="full-width log-field">
+        <mat-label>Party Log Content</mat-label>
+        <textarea
+          matInput
+          [ngModel]="partyLogInput()"
+          (ngModelChange)="partyLogInput.set($event)"
+          name="partyLog"
+          rows="6"
+          placeholder="Session data..."
+        ></textarea>
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="player-grid">
+    @for (player of players(); track player.id; let i = $index) {
+    <mat-card class="player-card" appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Player {{ i + 1 }}</mat-card-title>
+        <button
+          mat-icon-button
+          type="button"
+          color="warn"
+          (click)="removePlayer(player.id)"
+          [disabled]="players().length <= 2"
+          aria-label="Remove player"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Character Name</mat-label>
+          <input
+            matInput
+            [(ngModel)]="player.name"
+            name="name-{{ player.id }}"
+            required
+            placeholder="e.g. Eternal Oblivion"
+          />
+          <mat-icon matSuffix>person</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width log-field">
+          <mat-label>Session Log</mat-label>
+          <textarea
+            matInput
+            [(ngModel)]="player.log"
+            name="log-{{ player.id }}"
+            required
+            placeholder="Paste 'Session data:...' here"
+            rows="8"
+          ></textarea>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+    }
+
+    <button type="button" class="add-player-btn" (click)="addPlayer()">
+      <mat-icon>add</mat-icon>
+      <span>Add Player</span>
+    </button>
+  </div>
+
+  <div class="actions">
+    <button mat-fab extended color="primary" type="submit" [disabled]="!lootForm.form.valid">
+      <mat-icon>calculate</mat-icon>
+      Calculate Split
+    </button>
+  </div>
+</form>

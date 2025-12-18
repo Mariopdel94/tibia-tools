@@ -1,0 +1,221 @@
+.results-container {
+  margin-top: 3rem;
+
+  h2 {
+    text-align: center;
+    margin: 2rem 0;
+    color: var(--text-main);
+  }
+}
+
+.financial-section {
+  max-width: 900px;
+  margin: 0 auto 3rem;
+}
+
+.financial-table {
+  width: 100%;
+
+  th {
+    background: #f5f5f5;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+  }
+
+  td {
+    font-size: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  // Value Colors
+  .negative-val {
+    color: var(--color-danger);
+    font-weight: 500;
+  }
+  .profit strong {
+    color: var(--color-success);
+  }
+  .waste strong {
+    color: var(--color-danger);
+  }
+}
+
+.party-total {
+  margin-top: 1rem;
+  float: right;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 7. RESULTS - CARDS GRID                                                    */
+/* -------------------------------------------------------------------------- */
+.settlement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  clear: both;
+}
+
+.result-card {
+  height: 100%;
+
+  mat-card-header {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
+.empty-text {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  margin-top: 2rem;
+}
+
+/* --- Gold Card (Bank Transfers) --- */
+.gold-card {
+  border: 1px solid #ffd700; /* Fixed gold border */
+  background-color: #fffcf0; /* Fixed gold bg */
+
+  .gold-icon {
+    color: var(--color-gold);
+  }
+}
+
+.gold-row {
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 0.5rem;
+
+  .row-text {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .amount {
+    color: #bf360c; /* Deep Orange for numbers */
+    font-weight: 700;
+    font-family: 'Roboto Mono', monospace;
+  }
+
+  .copy-btn {
+    color: #bf360c;
+    opacity: 0.5;
+    &:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.05);
+    }
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+/* --- Trade Groups --- */
+.trade-group {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+
+  .trade-header {
+    background: #f5f5f5;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+
+    .arrow-text {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #999;
+    }
+  }
+
+  .trade-items {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .trade-item-row {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.9rem;
+    display: flex;
+    gap: 10px;
+
+    .qty {
+      font-weight: 700;
+      color: var(--color-primary);
+      min-width: 30px;
+      text-align: right;
+    }
+    .name {
+      color: #333;
+    }
+  }
+}
+
+/* --- Product Summary --- */
+.product-card {
+  .loot-chip {
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    font-weight: 500;
+    .chip-qty {
+      font-weight: 800;
+      margin-right: 5px;
+    }
+  }
+
+  .remainder-section {
+    background: #fafafa;
+    padding: 1rem;
+    border-radius: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    color: #666;
+  }
+
+  .remainder-item {
+    background: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    color: #444;
+  }
+}
+
+/* Utilities */
+.source {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+.dest {
+  color: var(--color-success);
+  font-weight: 700;
+}
