@@ -73,6 +73,17 @@ export class LiveSessionComponent implements OnInit {
     return Object.values(data.members);
   });
 
+  canSubmit = computed(() => {
+    return (
+      this.myName().trim().length > 0 &&
+      this.myLog().trim().length > 0 &&
+      this.memberList().length >= 2 &&
+      this.memberList().every((m) => m.log.trim().length > 0) &&
+      this.sessionData() &&
+      this.sessionData()!.partyLog.trim().length > 0
+    );
+  });
+
   constructor() {
     this.updateTrigger$.pipe(takeUntilDestroyed(), debounceTime(1500)).subscribe(() => {
       this.liveService.updateMyEntry(this.sessionId(), this.myName(), this.myLog());
