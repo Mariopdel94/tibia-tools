@@ -3,8 +3,17 @@
   <app-instruction-card />
 
   <div class="live-session-container">
-    <button mat-raised-button (click)="startLiveSession()">
-      <mat-icon>groups</mat-icon> Start Live Party
+    <button mat-raised-button (click)="!isCreatingLiveSession() && startLiveSession()">
+      @if (isCreatingLiveSession()) {
+      <div class="center-xy">
+        <mat-spinner diameter="24"></mat-spinner>
+      </div>
+      } @else {
+      <div class="center-xy" style="gap: var(--mat-button-filled-icon-spacing, 8px)">
+        <mat-icon>groups</mat-icon>
+        Start Live Party
+      </div>
+      }
     </button>
   </div>
 

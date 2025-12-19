@@ -16,6 +16,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -45,6 +46,7 @@ import { LootReport } from '../loot-report/loot-report';
     InstructionCard,
     LootForm,
     LootReport,
+    MatProgressSpinner,
   ],
   templateUrl: './home.html',
   styleUrl: './home.scss',
@@ -68,6 +70,7 @@ export class Home implements OnInit {
   ]);
   readonly results = signal<LootResult | null>(null);
   isGeneratingTinyUrl = signal<boolean>(false);
+  isCreatingLiveSession = signal(false);
 
   ngOnInit(): void {
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -79,8 +82,10 @@ export class Home implements OnInit {
   }
 
   async startLiveSession() {
+    this.isCreatingLiveSession.set(true);
     const id = await this.liveService.createSession();
     this.router.navigate(['/live', id]);
+    this.isCreatingLiveSession.set(false);
   }
 
   copyShareLink(url: string, hash: string) {
