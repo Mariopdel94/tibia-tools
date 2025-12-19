@@ -17,6 +17,7 @@ import { PlayerInput } from '../../models/creature-product-splitter';
 import { LiveSession, LiveSessionService } from '../../services/live-session.service';
 import { LootCalculatorService } from '../../services/loot-calculator.service';
 import { Header } from '../header/header';
+import { LiveSessionInstructions } from '../live-session-instructions/live-session-instructions';
 import { LootReport } from '../loot-report/loot-report';
 import { SessionMembers } from '../session-members/session-members';
 
@@ -35,6 +36,7 @@ import { SessionMembers } from '../session-members/session-members';
     Header,
     LootReport,
     SessionMembers,
+    LiveSessionInstructions,
   ],
   templateUrl: './live-session.html',
   styleUrl: './live-session.scss',

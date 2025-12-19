@@ -1,0 +1,37 @@
+<div class="info-section" [class.collapsed]="collapsed()">
+  <div class="info-header" (click)="toggle()">
+    <div class="title-row">
+      <div class="info-icon">
+        <mat-icon>hub</mat-icon>
+      </div>
+      <div class="info-text">
+        <h3>How Live Sessions Work</h3>
+        <p>Collaborate in real-time without sending files.</p>
+      </div>
+    </div>
+    <button mat-icon-button class="collapse-btn">
+      <mat-icon>{{ collapsed() ? 'expand_more' : 'expand_less' }}</mat-icon>
+    </button>
+  </div>
+
+  @if (!collapsed()) {
+  <div class="steps-grid">
+    <div class="step">
+      <span class="step-num">1</span>
+      <p><strong>Share the Link</strong> with your party members.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">2</span>
+      <p>Each member enters their own <strong>Session Log</strong>.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <p>The <strong>Leader</strong> enters the Party Analyzer log and clicks Calculate.</p>
+    </div>
+    <div class="step">
+      <span class="step-num">4</span>
+      <p>Results <strong>sync instantly</strong> to everyone's screen.</p>
+    </div>
+  </div>
+  }
+</div>
