@@ -113,7 +113,6 @@ export class LiveSessionComponent implements OnInit {
       .getSession(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((data) => {
-        console.log('Live Session Update:', data);
         if (data) {
           this.sessionData.set(data);
 
