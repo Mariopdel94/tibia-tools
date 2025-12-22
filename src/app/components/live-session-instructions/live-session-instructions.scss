@@ -12,12 +12,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: pointer;
-  user-select: none;
-
-  &:hover {
-    background: rgba(63, 81, 181, 0.05);
-  }
 }
 
 .title-row {

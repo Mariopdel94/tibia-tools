@@ -1,5 +1,5 @@
-<div class="info-section" [class.collapsed]="collapsed()">
-  <div class="info-header" (click)="toggle()">
+<div class="info-section">
+  <div class="info-header">
     <div class="title-row">
       <div class="info-icon">
         <mat-icon>hub</mat-icon>
@@ -9,12 +9,8 @@
         <p>Collaborate in real-time without sending files.</p>
       </div>
     </div>
-    <button mat-icon-button class="collapse-btn">
-      <mat-icon>{{ collapsed() ? 'expand_more' : 'expand_less' }}</mat-icon>
-    </button>
   </div>
 
-  @if (!collapsed()) {
   <div class="steps-grid">
     <div class="step">
       <span class="step-num">1</span>
@@ -33,5 +29,4 @@
       <p>Results <strong>sync instantly</strong> to everyone's screen.</p>
     </div>
   </div>
-  }
 </div>
