@@ -1,3 +1,11 @@
+@if (isClosed()) {
+<div class="live-status-bar closed">
+  <div class="status-badge"><mat-icon>lock</mat-icon> Session Archived</div>
+  <div class="status-info">
+    <span class="label">Read-Only History</span>
+  </div>
+</div>
+} @else {
 <div class="live-status-bar">
   <div class="status-badge" [class.active]="isActive()">
     <span class="pulsing-dot"></span> Live Session
@@ -7,3 +15,4 @@
     <span class="label">Members in Lobby</span>
   </div>
 </div>
+}

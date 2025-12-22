@@ -57,6 +57,18 @@
       font-size: 0.9rem;
     }
   }
+
+  &.closed {
+    border-left: 5px solid #757575; // Grey border
+
+    .status-badge {
+      color: #757575; // Grey text
+      gap: 0.5rem;
+      mat-icon {
+        font-size: 20px;
+      }
+    }
+  }
 }
 
 @keyframes pulse {

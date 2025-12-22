@@ -75,6 +75,8 @@ export class LiveSessionComponent implements OnInit {
     return Object.values(data.members);
   });
 
+  isClosed = computed(() => this.sessionData()?.status === 'closed');
+
   canSubmit = computed(() => {
     return (
       this.myName().trim().length > 0 &&
@@ -88,6 +90,8 @@ export class LiveSessionComponent implements OnInit {
 
   constructor() {
     this.updateTrigger$.pipe(takeUntilDestroyed(), debounceTime(1500)).subscribe(() => {
+      if (this.isClosed()) return;
+
       const currentName = this.myName();
       if (currentName) {
         localStorage.setItem('tibia-last-char-name', currentName);
@@ -109,12 +113,13 @@ export class LiveSessionComponent implements OnInit {
       .getSession(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((data) => {
+        console.log('Live Session Update:', data);
         if (data) {
           this.sessionData.set(data);
 
           // If 'me' exists in DB, ALWAYS trust DB over my local default
           const me = data.members[this.liveService.myUserId];
-          if (me) {
+          if (me && this.myName() === '') {
             // Even if myName() has a value (from localStorage), update it to match the active session
             if (me.name !== this.myName()) {
               this.myName.set(me.name);

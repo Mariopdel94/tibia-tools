@@ -29,6 +29,7 @@ export interface LiveSession {
   partyLog: string;
   members: Record<string, SessionMember>; // Map of UserID -> Member Data
   results?: LootResult;
+  status?: 'open' | 'closed';
 }
 
 const SESSION_EXPIRATION_DAYS = 7; // How old a session must be to get deleted
@@ -156,6 +157,6 @@ export class LiveSessionService {
   async saveResults(sessionId: string, results: LootResult) {
     const docRef = doc(this.firestore, `sessions/${sessionId}`);
     // Save the entire result object to DB so everyone receives it
-    await updateDoc(docRef, { results });
+    await updateDoc(docRef, { results, status: 'closed' });
   }
 }

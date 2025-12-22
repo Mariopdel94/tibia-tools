@@ -1,24 +1,27 @@
 <div class="container">
-  <app-header>
+  <app-header />
+  <app-live-session-instructions />
+
+  <div class="actions-container">
     <button mat-stroked-button class="invite-btn" (click)="copyLink()">
       <mat-icon>link</mat-icon> Copy Invite Link
     </button>
-  </app-header>
+  </div>
 
-  <app-live-session-instructions />
-
-  <app-live-status-bar [membersList]="memberList()" [isActive]="true" />
+  <app-live-status-bar [membersList]="memberList()" [isActive]="true" [isClosed]="isClosed()" />
 
   @if (sessionData(); as session) {
   <div class="session-grid">
-    <mat-card appearance="outlined" class="input-card user-card">
+    <mat-card appearance="outlined" class="input-card user-card" [class.disabled-card]="isClosed()">
       <mat-card-header>
         <div class="header-icon-wrapper">
           <mat-icon>person_edit</mat-icon>
         </div>
         <div class="header-text">
           <mat-card-title>Your Data</mat-card-title>
-          <mat-card-subtitle>Enter your character details</mat-card-subtitle>
+          <mat-card-subtitle>
+            {{ isClosed() ? 'Session is locked' : 'Enter your character details' }}
+          </mat-card-subtitle>
         </div>
       </mat-card-header>
 
@@ -29,6 +32,7 @@
             matInput
             [ngModel]="myName()"
             (ngModelChange)="myName.set($event); triggerUpdate()"
+            [disabled]="isClosed()"
             placeholder="e.g. Eternal Oblivion"
           />
         </mat-form-field>
@@ -39,6 +43,7 @@
             matInput
             [ngModel]="myLog()"
             (ngModelChange)="myLog.set($event); triggerUpdate()"
+            [disabled]="isClosed()"
             placeholder="Paste 'Looted Items:...' here"
           ></textarea>
         </mat-form-field>
@@ -65,6 +70,7 @@
             [ngModel]="session.partyLog"
             (ngModelChange)="updatePartyLog($event)"
             placeholder="Paste Balance log here..."
+            [disabled]="isClosed()"
           ></textarea>
         </mat-form-field>
 
@@ -74,11 +80,13 @@
         </div>
       </mat-card-content>
 
+      @if (!isClosed()) {
       <mat-card-actions align="end">
         <button mat-fab extended color="primary" (click)="calculate()" [disabled]="!canSubmit()">
           <mat-icon>publish</mat-icon> Calculate & Publish
         </button>
       </mat-card-actions>
+      }
     </mat-card>
     } @else { @if (!results()) {
     <mat-card appearance="outlined" class="input-card waiting-card">

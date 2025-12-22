@@ -2,8 +2,6 @@
   <app-header />
   <app-live-session-instructions />
 
-  <app-live-status-bar [membersList]="[]" [isActive]="false" />
-
   <div class="live-session-container">
     <button mat-raised-button (click)="!isCreatingLiveSession() && startLiveSession()">
       @if (isCreatingLiveSession()) {
@@ -18,4 +16,6 @@
       }
     </button>
   </div>
+
+  <app-live-status-bar [membersList]="[]" [isActive]="false" [isClosed]="false" />
 </div>
