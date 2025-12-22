@@ -57,7 +57,7 @@ export class LiveSessionComponent implements OnInit {
   results = computed(() => this.sessionData()?.results ?? null);
 
   // My Local Input State
-  myName = signal('');
+  myName = signal(localStorage.getItem('tibia-last-char-name') || '');
   myLog = signal('');
 
   private updateTrigger$ = new Subject<void>();
@@ -88,6 +88,10 @@ export class LiveSessionComponent implements OnInit {
 
   constructor() {
     this.updateTrigger$.pipe(takeUntilDestroyed(), debounceTime(1500)).subscribe(() => {
+      const currentName = this.myName();
+      if (currentName) {
+        localStorage.setItem('tibia-last-char-name', currentName);
+      }
       this.liveService.updateMyEntry(this.sessionId(), this.myName(), this.myLog());
     });
   }
@@ -108,11 +112,16 @@ export class LiveSessionComponent implements OnInit {
         if (data) {
           this.sessionData.set(data);
 
-          // If I exist in DB, sync my local form to DB (in case of refresh)
+          // If 'me' exists in DB, ALWAYS trust DB over my local default
           const me = data.members[this.liveService.myUserId];
-          if (me && this.myName() === '') {
-            this.myName.set(me.name);
-            this.myLog.set(me.log);
+          if (me) {
+            // Even if myName() has a value (from localStorage), update it to match the active session
+            if (me.name !== this.myName()) {
+              this.myName.set(me.name);
+            }
+            if (me.log !== this.myLog()) {
+              this.myLog.set(me.log);
+            }
           }
         }
       });
