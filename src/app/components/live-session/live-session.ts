@@ -18,6 +18,7 @@ import { LiveSession, LiveSessionService } from '../../services/live-session.ser
 import { LootCalculatorService } from '../../services/loot-calculator.service';
 import { Header } from '../header/header';
 import { LiveSessionInstructions } from '../live-session-instructions/live-session-instructions';
+import { LiveStatusBar } from '../live-status-bar/live-status-bar';
 import { LootReport } from '../loot-report/loot-report';
 import { SessionMembers } from '../session-members/session-members';
 
@@ -37,6 +38,7 @@ import { SessionMembers } from '../session-members/session-members';
     LootReport,
     SessionMembers,
     LiveSessionInstructions,
+    LiveStatusBar,
   ],
   templateUrl: './live-session.html',
   styleUrl: './live-session.scss',

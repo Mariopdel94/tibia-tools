@@ -1,0 +1,9 @@
+<div class="live-status-bar">
+  <div class="status-badge" [class.active]="isActive()">
+    <span class="pulsing-dot"></span> Live Session
+  </div>
+  <div class="status-info">
+    <span class="count">{{ membersList().length }}</span>
+    <span class="label">Members in Lobby</span>
+  </div>
+</div>

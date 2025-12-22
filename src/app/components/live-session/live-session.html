@@ -7,13 +7,7 @@
 
   <app-live-session-instructions />
 
-  <div class="live-status-bar">
-    <div class="status-badge"><span class="pulsing-dot"></span> Live Session</div>
-    <div class="status-info">
-      <span class="count">{{ memberList().length }}</span>
-      <span class="label">Members in Lobby</span>
-    </div>
-  </div>
+  <app-live-status-bar [membersList]="memberList()" [isActive]="true" />
 
   @if (sessionData(); as session) {
   <div class="session-grid">
