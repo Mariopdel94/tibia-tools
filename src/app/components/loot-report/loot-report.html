@@ -43,27 +43,27 @@
     <div class="center-xy" style="margin-top: 1rem">
       <div class="party-total">Total Liquid Profit: {{ res.partyBalance | number }} gp</div>
       @if (canShareUrls()) {
-      <button
-        mat-flat-button
-        color="accent"
-        class="share-btn"
-        (click)="!isLoadingShortUrlGeneration() && shareShortUrl.emit()"
-      >
-        @if (isLoadingShortUrlGeneration()) {
-        <div class="center-xy">
-          <mat-spinner diameter="24"></mat-spinner>
-        </div>
-        } @else {
-        <div class="center-xy" style="gap: var(--mat-button-filled-icon-spacing, 8px)">
+        <button
+          mat-flat-button
+          color="accent"
+          class="share-btn"
+          (click)="!isLoadingShortUrlGeneration() && shareShortUrl.emit()"
+        >
+          @if (isLoadingShortUrlGeneration()) {
+            <div class="center-xy">
+              <mat-spinner diameter="24"></mat-spinner>
+            </div>
+          } @else {
+            <div class="center-xy" style="gap: var(--mat-button-filled-icon-spacing, 8px)">
+              <mat-icon>share</mat-icon>
+              Generate TinyURL Share Link
+            </div>
+          }
+        </button>
+        <button mat-flat-button color="accent" class="share-btn" (click)="shareLongUrl.emit()">
           <mat-icon>share</mat-icon>
-          Generate TinyURL Share Link
-        </div>
-        }
-      </button>
-      <button mat-flat-button color="accent" class="share-btn" (click)="shareLongUrl.emit()">
-        <mat-icon>share</mat-icon>
-        Generate Long Share Link
-      </button>
+          Generate Long Share Link
+        </button>
       }
     </div>
   </div>
@@ -77,28 +77,28 @@
       </mat-card-header>
       <mat-card-content>
         @if (res.goldInstructions.length === 0) {
-        <p>Balances are equal. No transfers needed.</p>
+          <p>Balances are equal. No transfers needed.</p>
         }
         <div class="instruction-list">
           @for (ins of res.goldInstructions; track ins.from + ins.to) {
-          <div class="instruction-row gold-row">
-            <div class="row-text">
-              <span class="player source">{{ ins.from }}</span>
-              <span class="arrow">transfer</span>
-              <span class="amount">{{ ins.amount | number }}</span>
-              <span class="arrow">to</span>
-              <span class="player dest">{{ ins.to }}</span>
+            <div class="instruction-row gold-row">
+              <div class="row-text">
+                <span class="player source">{{ ins.from }}</span>
+                <span class="arrow">transfer</span>
+                <span class="amount">{{ ins.amount | number }}</span>
+                <span class="arrow">to</span>
+                <span class="player dest">{{ ins.to }}</span>
+              </div>
+              <button
+                mat-icon-button
+                type="button"
+                class="copy-btn"
+                (click)="copyTransfer(ins)"
+                title="Copy NPC Command"
+              >
+                <mat-icon>content_copy</mat-icon>
+              </button>
             </div>
-            <button
-              mat-icon-button
-              type="button"
-              class="copy-btn"
-              (click)="copyTransfer(ins)"
-              title="Copy NPC Command"
-            >
-              <mat-icon>content_copy</mat-icon>
-            </button>
-          </div>
           }
         </div>
       </mat-card-content>
@@ -112,26 +112,32 @@
       </mat-card-header>
       <mat-card-content>
         @if (res.groupedItemInstructions.length === 0) {
-        <p class="empty-text">No item trades needed.</p>
+          <p class="empty-text">No item trades needed.</p>
         }
         <div class="instruction-list">
           @for (group of res.groupedItemInstructions; track group.from + group.to) {
-          <div class="trade-group">
-            <div class="trade-header">
-              <span class="player source">{{ group.from }}</span>
-              <span class="arrow-text">trades to</span>
-              <span class="player dest">{{ group.to }}</span>
-            </div>
-
-            <div class="trade-items">
-              @for (item of group.items; track item.name) {
-              <div class="trade-item-row">
-                <span class="qty">{{ item.amount }}x</span>
-                <span class="name">{{ item.name }}</span>
+            <div class="trade-group">
+              <div class="trade-header">
+                <span class="player source">{{ group.from }}</span>
+                <span class="arrow-text">trades to</span>
+                <span class="player dest">{{ group.to }}</span>
               </div>
-              }
+
+              <div class="trade-items">
+                @for (item of group.items; track item.name) {
+                  <div class="trade-item-row">
+                    <span class="qty">{{ item.amount }}x</span>
+                    <img
+                      [src]="
+                        `https://tibiopedia.pl/images/static/items/${item.name.toLowerCase().replace(/ /g, '_')}.gif`
+                      "
+                      alt=""
+                    />
+                    <span class="name">{{ item.name }}</span>
+                  </div>
+                }
+              </div>
             </div>
-          </div>
           }
         </div>
       </mat-card-content>
@@ -145,24 +151,24 @@
       </mat-card-header>
       <mat-card-content>
         @if (res.totalLoot.length === 0) {
-        <p class="empty-text">No creature products found.</p>
+          <p class="empty-text">No creature products found.</p>
         }
         <mat-chip-set>
           @for (item of res.totalLoot; track item.name) {
-          <mat-chip class="loot-chip">
-            <span class="chip-qty">{{ item.amount }}x</span> {{ item.name }}
-          </mat-chip>
+            <mat-chip class="loot-chip">
+              <span class="chip-qty">{{ item.amount }}x</span> {{ item.name }}
+            </mat-chip>
           }
         </mat-chip-set>
 
         @if (res.remainder.length > 0) {
-        <mat-divider style="margin: 1rem 0"></mat-divider>
-        <div class="remainder-section">
-          <small>Remainder (Unsplit):</small>
-          @for (item of res.remainder; track item.name) {
-          <span class="remainder-item">{{ item.amount }}x {{ item.name }}</span>
-          }
-        </div>
+          <mat-divider style="margin: 1rem 0"></mat-divider>
+          <div class="remainder-section">
+            <small>Remainder (Unsplit):</small>
+            @for (item of res.remainder; track item.name) {
+              <span class="remainder-item">{{ item.amount }}x {{ item.name }}</span>
+            }
+          </div>
         }
       </mat-card-content>
     </mat-card>
