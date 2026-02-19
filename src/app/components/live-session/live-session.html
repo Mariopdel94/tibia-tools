@@ -138,6 +138,23 @@
               <div class="lobby-section">
                 <h3>Members</h3>
                 <app-session-members [members]="memberList()" />
+                <mat-expansion-panel class="ready" style="margin-top: 0.75rem">
+                  <mat-expansion-panel-header>
+                    <div class="member-chip">
+                      <div class="avatar">
+                        <mat-icon>group</mat-icon>
+                      </div>
+                      <div class="member-info">
+                        <span class="name">Party Log</span>
+                        <span class="status">Ready</span>
+                      </div>
+                    </div>
+                  </mat-expansion-panel-header>
+                  <pre>
+        {{ sessionData()?.partyLog }}
+      </pre
+                  >
+                </mat-expansion-panel>
               </div>
               <p class="success-text">Scroll down to see your transfer details and summary.</p>
               <button mat-stroked-button class="scroll-btn" (click)="scrollToResults()">

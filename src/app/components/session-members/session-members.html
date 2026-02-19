@@ -1,13 +1,22 @@
 <div class="members-list">
-  @for(m of members(); track m.id) {
-  <div class="member-chip" [class.ready]="m.log.length > 10">
-    <div class="avatar">
-      <mat-icon>{{ m.log.length > 10 ? 'check_circle' : 'hourglass_empty' }}</mat-icon>
-    </div>
-    <div class="member-info">
-      <span class="name">{{ m.name || 'Unknown' }}</span>
-      <span class="status">{{ m.log.length > 10 ? 'Ready' : 'Not Ready' }}</span>
-    </div>
-  </div>
+  @for (m of members(); track m.id) {
+    @let ready = m.log.length > 10;
+    <!-- <div class="member-chip" [class.ready]="ready"></div> -->
+    <mat-expansion-panel [class.ready]="ready">
+      <mat-expansion-panel-header>
+        <div class="member-chip">
+          <div class="avatar">
+            <mat-icon>{{ ready ? 'check_circle' : 'hourglass_empty' }}</mat-icon>
+          </div>
+          <div class="member-info">
+            <span class="name">{{ m.name || 'Unknown' }}</span>
+            <span class="status">{{ ready ? 'Ready' : 'Not Ready' }}</span>
+          </div>
+        </div>
+      </mat-expansion-panel-header>
+      <pre>
+        {{ m.log }}
+      </pre>
+    </mat-expansion-panel>
   }
 </div>

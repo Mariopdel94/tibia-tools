@@ -1,19 +1,12 @@
 import { Clipboard } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  linkedSignal,
-  OnInit,
-  signal,
-} from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -47,14 +40,15 @@ import { SessionMembers } from '../session-members/session-members';
     SessionMembers,
     LiveSessionInstructions,
     LiveStatusBar,
+    MatExpansionModule,
   ],
   templateUrl: './live-session.html',
-  styleUrl: './live-session.scss',
+  styleUrls: ['./live-session.scss', '../session-members/session-members.scss'],
 })
 export class LiveSessionComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private liveService = inject(LiveSessionService);
+  liveService = inject(LiveSessionService);
   private calculator = inject(LootCalculatorService);
   private clipboard = inject(Clipboard);
   private snackBar = inject(MatSnackBar);
@@ -66,10 +60,7 @@ export class LiveSessionComponent implements OnInit {
 
   // My Local Input State
   myName = signal(localStorage.getItem('tibia-last-char-name') || '');
-  myLog = linkedSignal(() => {
-    if (this.sessionData()?.status !== 'closed') return '';
-    return this.sessionData()?.members[this.liveService.myUserId]?.log || '';
-  });
+  myLog = signal('');
 
   private updateTrigger$ = new Subject<void>();
 
@@ -125,11 +116,12 @@ export class LiveSessionComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((data) => {
         if (data) {
+          console.log(data, this.liveService.myUserId);
           this.sessionData.set(data);
 
           // If 'me' exists in DB, ALWAYS trust DB over my local default
           const me = data.members[this.liveService.myUserId];
-          if (me && this.myName() === '') {
+          if (me) {
             // Even if myName() has a value (from localStorage), update it to match the active session
             // if (me.name !== this.myName()) {
             //   this.myName.set(me.name);
