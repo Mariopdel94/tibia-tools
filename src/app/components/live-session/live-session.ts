@@ -1,6 +1,14 @@
 import { Clipboard } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  linkedSignal,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -58,7 +66,10 @@ export class LiveSessionComponent implements OnInit {
 
   // My Local Input State
   myName = signal(localStorage.getItem('tibia-last-char-name') || '');
-  myLog = signal('');
+  myLog = linkedSignal(() => {
+    if (this.sessionData()?.status !== 'closed') return '';
+    return this.sessionData()?.members[this.liveService.myUserId]?.log || '';
+  });
 
   private updateTrigger$ = new Subject<void>();
 
@@ -120,9 +131,9 @@ export class LiveSessionComponent implements OnInit {
           const me = data.members[this.liveService.myUserId];
           if (me && this.myName() === '') {
             // Even if myName() has a value (from localStorage), update it to match the active session
-            if (me.name !== this.myName()) {
-              this.myName.set(me.name);
-            }
+            // if (me.name !== this.myName()) {
+            //   this.myName.set(me.name);
+            // }
             if (me.log !== this.myLog()) {
               this.myLog.set(me.log);
             }
