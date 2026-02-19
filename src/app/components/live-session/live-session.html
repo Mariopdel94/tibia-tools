@@ -150,10 +150,7 @@
                       </div>
                     </div>
                   </mat-expansion-panel-header>
-                  <pre>
-        {{ sessionData()?.partyLog }}
-      </pre
-                  >
+                  <pre>{{ sessionData()?.partyLog?.trimStart() }}</pre>
                 </mat-expansion-panel>
               </div>
               <p class="success-text">Scroll down to see your transfer details and summary.</p>
